@@ -73,10 +73,6 @@ public abstract class RestConnection {
 
     private final URL hubBaseUrl;
 
-    private final String hubUsername;
-
-    private final String hubPassword;
-
     private int timeout = 120;
 
     private String proxyHost;
@@ -105,11 +101,9 @@ public abstract class RestConnection {
         return sdf.format(date);
     }
 
-    public RestConnection(final IntLogger logger, final URL hubBaseUrl, final String hubUsername, final String hubPassword, final int timeout) {
+    public RestConnection(final IntLogger logger, final URL hubBaseUrl, final int timeout) {
         this.logger = logger;
         this.hubBaseUrl = hubBaseUrl;
-        this.hubUsername = hubUsername;
-        this.hubPassword = hubPassword;
         setTimeout(timeout);
     }
 
@@ -418,14 +412,6 @@ public abstract class RestConnection {
 
     public void setProxyPassword(final String proxyPassword) {
         this.proxyPassword = proxyPassword;
-    }
-
-    public String getHubUsername() {
-        return hubUsername;
-    }
-
-    public String getHubPassword() {
-        return hubPassword;
     }
 
 }

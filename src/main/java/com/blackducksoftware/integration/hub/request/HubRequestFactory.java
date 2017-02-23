@@ -34,33 +34,21 @@ public class HubRequestFactory {
         this.restConnection = restConnection;
     }
 
-    public HubRequest createGetRequest(final List<String> urlSegments) {
-        final HubRequest hubRequest = new HubRequest(restConnection);
-        hubRequest.addUrlSegments(urlSegments);
-        return hubRequest;
-    }
-
-    public HubRequest createGetRequest(final String url) {
-        final HubRequest hubRequest = new HubRequest(restConnection);
-        hubRequest.setUrl(url);
-        return hubRequest;
-    }
-
-    public HubPagedRequest createGetPagedRequest(final List<String> urlSegments) {
+    public HubPagedRequest createPagedRequest(final List<String> urlSegments) {
         final HubPagedRequest hubPagedRequest = new HubPagedRequest(restConnection);
         hubPagedRequest.setLimit(100);
         hubPagedRequest.addUrlSegments(urlSegments);
         return hubPagedRequest;
     }
 
-    public HubPagedRequest createGetPagedRequest(final int itemsPerPage, final List<String> urlSegments) {
+    public HubPagedRequest createPagedRequest(final int itemsPerPage, final List<String> urlSegments) {
         final HubPagedRequest hubPagedRequest = new HubPagedRequest(restConnection);
         hubPagedRequest.setLimit(itemsPerPage);
         hubPagedRequest.addUrlSegments(urlSegments);
         return hubPagedRequest;
     }
 
-    public HubPagedRequest createGetPagedRequest(final List<String> urlSegments, final String q) {
+    public HubPagedRequest createPagedRequest(final List<String> urlSegments, final String q) {
         final HubPagedRequest hubPagedRequest = new HubPagedRequest(restConnection);
         hubPagedRequest.setLimit(100);
         hubPagedRequest.addUrlSegments(urlSegments);
@@ -68,7 +56,7 @@ public class HubRequestFactory {
         return hubPagedRequest;
     }
 
-    public HubPagedRequest createGetPagedRequest(final int itemsPerPage, final List<String> urlSegments, final String q) {
+    public HubPagedRequest createPagedRequest(final int itemsPerPage, final List<String> urlSegments, final String q) {
         final HubPagedRequest hubPagedRequest = new HubPagedRequest(restConnection);
         hubPagedRequest.setLimit(itemsPerPage);
         hubPagedRequest.addUrlSegments(urlSegments);
@@ -76,21 +64,21 @@ public class HubRequestFactory {
         return hubPagedRequest;
     }
 
-    public HubPagedRequest createGetPagedRequest(final String url) {
+    public HubPagedRequest createPagedRequest(final String url) {
         final HubPagedRequest hubPagedRequest = new HubPagedRequest(restConnection);
         hubPagedRequest.setLimit(100);
         hubPagedRequest.setUrl(url);
         return hubPagedRequest;
     }
 
-    public HubPagedRequest createGetPagedRequest(final int itemsPerPage, final String url) {
+    public HubPagedRequest createPagedRequest(final int itemsPerPage, final String url) {
         final HubPagedRequest hubPagedRequest = new HubPagedRequest(restConnection);
         hubPagedRequest.setLimit(itemsPerPage);
         hubPagedRequest.setUrl(url);
         return hubPagedRequest;
     }
 
-    public HubPagedRequest createGetPagedRequest(final String url, final String q) {
+    public HubPagedRequest createPagedRequest(final String url, final String q) {
         final HubPagedRequest hubPagedRequest = new HubPagedRequest(restConnection);
         hubPagedRequest.setLimit(100);
         hubPagedRequest.setUrl(url);
@@ -98,7 +86,7 @@ public class HubRequestFactory {
         return hubPagedRequest;
     }
 
-    public HubPagedRequest createGetPagedRequest(final int itemsPerPage, final String url, final String q) {
+    public HubPagedRequest createPagedRequest(final int itemsPerPage, final String url, final String q) {
         final HubPagedRequest hubPagedRequest = new HubPagedRequest(restConnection);
         hubPagedRequest.setLimit(itemsPerPage);
         hubPagedRequest.setUrl(url);
@@ -106,7 +94,7 @@ public class HubRequestFactory {
         return hubPagedRequest;
     }
 
-    public HubRequest createPostRequest(final List<String> urlSegments) {
+    public HubRequest createRequest(final List<String> urlSegments) {
         final HubRequest hubRequest = new HubRequest(restConnection);
         hubRequest.addUrlSegments(urlSegments);
         return hubRequest;

@@ -44,13 +44,19 @@ import okhttp3.Response;
 
 public class CredentialsRestConnection extends RestConnection {
 
+    private final String hubUsername;
+
+    private final String hubPassword;
+
     public CredentialsRestConnection(final IntLogger logger, final URL hubBaseUrl, final String hubUsername, final String hubPassword, final int timeout) {
-        super(logger, hubBaseUrl, hubUsername, hubPassword, timeout);
+        super(logger, hubBaseUrl, timeout);
+        this.hubUsername = hubUsername;
+        this.hubPassword = hubPassword;
     }
 
     @Override
     public void addBuilderAuthentication() throws IntegrationRestException {
-        if (StringUtils.isNotBlank(getHubUsername()) && StringUtils.isNotBlank(getHubPassword())) {
+        if (StringUtils.isNotBlank(hubUsername) && StringUtils.isNotBlank(hubPassword)) {
             final CookieManager cookieManager = new CookieManager();
             cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
             getBuilder().cookieJar(new JavaNetCookieJar(cookieManager));
@@ -68,10 +74,10 @@ public class CredentialsRestConnection extends RestConnection {
         final HttpUrl httpUrl = createHttpUrl(segments, null);
 
         final Map<String, String> content = new HashMap<>();
-        if (StringUtils.isNotBlank(getHubUsername()) && StringUtils.isNotBlank(getHubPassword())) {
+        if (StringUtils.isNotBlank(hubUsername) && StringUtils.isNotBlank(hubPassword)) {
 
-            content.put("j_username", getHubUsername());
-            content.put("j_password", getHubPassword());
+            content.put("j_username", hubUsername);
+            content.put("j_password", hubPassword);
             final Request request = createPostRequest(httpUrl, createEncodedRequestBody(content));
             Response response = null;
             try {
