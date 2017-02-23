@@ -63,6 +63,11 @@ public class OkAuthenticator implements Authenticator {
         }
         checkAuthScheme(response);
         if (isBasicAuth()) {
+            if (response.priorResponse() != null) {
+                // Should not attempt authentication again if the reponse has a previous reponse
+                // becasue that means we have already tried to authenticate
+                return null;
+            }
             return authenticateBasic(response);
         }
         return null;
