@@ -1,6 +1,4 @@
-/**
- * Hub Rest Common
- *
+/*******************************************************************************
  * Copyright (C) 2017 Black Duck Software, Inc.
  * http://www.blackducksoftware.com/
  *
@@ -20,7 +18,7 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations
  * under the License.
- */
+ *******************************************************************************/
 package com.blackducksoftware.integration.hub.rest.oauth;
 
 import java.net.MalformedURLException;
@@ -50,6 +48,14 @@ public class TokenManager {
     public TokenManager(final IntLogger logger, final int timeout) {
         this.logger = logger;
         this.timeout = timeout;
+    }
+
+    public IntLogger getLogger() {
+        return logger;
+    }
+
+    public int getTimeout() {
+        return timeout;
     }
 
     public OAuthConfiguration getConfiguration() {
