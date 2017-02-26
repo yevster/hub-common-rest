@@ -1,4 +1,6 @@
-/*******************************************************************************
+/**
+ * Hub Rest Common
+ *
  * Copyright (C) 2017 Black Duck Software, Inc.
  * http://www.blackducksoftware.com/
  *
@@ -18,7 +20,7 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations
  * under the License.
- *******************************************************************************/
+ */
 package com.blackducksoftware.integration.hub.rest.oauth;
 
 import java.net.MalformedURLException;
@@ -40,6 +42,10 @@ public class TokenManager {
     private final int timeout;
 
     private OAuthConfiguration configuration;
+
+    private Token userToken;
+
+    private Token clientToken;
 
     public TokenManager(final IntLogger logger, final int timeout) {
         this.logger = logger;
@@ -91,6 +97,25 @@ public class TokenManager {
         return result;
     }
 
+    public Token getToken(final AccessType accessType) throws IntegrationException {
+        Token result = null;
+
+        if (AccessType.USER.equals(accessType)) {
+            if (userToken == null) {
+                result = refreshUserAccessToken();
+            } else {
+                result = userToken;
+            }
+        } else if (AccessType.CLIENT.equals(accessType)) {
+            if (clientToken == null) {
+                refreshClientAccessToken();
+            }
+            result = clientToken;
+        }
+
+        return result;
+    }
+
     private Token refreshUserAccessToken() throws IntegrationException {
         Token result = null;
         if (StringUtils.isNotBlank(configuration.refreshToken)) {
@@ -112,6 +137,7 @@ public class TokenManager {
                 final HubOAuthTokenService tokenService = new HubOAuthTokenService(connection);
                 result = tokenService.refreshUserToken(configuration.clientId,
                         configuration.refreshToken);
+                userToken = result;
             } catch (final IntegrationException | MalformedURLException ex) {
                 throw new IntegrationException("Error refreshing user token", ex);
             }
@@ -141,6 +167,7 @@ public class TokenManager {
 
             final HubOAuthTokenService tokenService = new HubOAuthTokenService(connection);
             result = tokenService.refreshClientToken(configuration.clientId);
+            clientToken = result;
         } catch (final IntegrationException | MalformedURLException ex) {
             throw new IntegrationException("Error refreshing client token", ex);
         }

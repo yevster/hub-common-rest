@@ -46,19 +46,23 @@ public class OkOauthAuthenticator implements Authenticator {
 
     @Override
     public Request authenticate(final Route route, final Response response) throws IOException {
-        final String token = refreshToken();
-        final String credential = createTokenCredential(token);
-        return response.request().newBuilder().header(WWW_AUTH_RESP, credential).build();
+        if (response.priorResponse() != null) {
+            return null;
+        } else {
+            final String token = getToken();
+            final String credential = createTokenCredential(token);
+            return response.request().newBuilder().header(WWW_AUTH_RESP, credential).build();
+        }
     }
 
     private String createTokenCredential(final String token) {
-        return String.format("%s %s", "Bearer", token);
+        return String.format("Bearer %s", token);
     }
 
-    private String refreshToken() throws IOException {
+    private String getToken() throws IOException {
         Token token;
         try {
-            token = tokenManager.refreshToken(accessType);
+            token = tokenManager.getToken(accessType);
             return token.accessToken;
         } catch (final IntegrationException ex) {
             throw new IOException("Cannot refresh token", ex);
