@@ -50,6 +50,7 @@ public class HubOAuthTokenService extends HubRequestService {
     public Token requestUserToken(final String clientId, final String clientSecret, final String authCode, final String redirectUri)
             throws IntegrationException {
         Token token = null;
+        Response response = null;
         try {
             final Map<String, String> formDataMap = new LinkedHashMap<>();
             formDataMap.put("grant_type", "authorization_code");
@@ -64,12 +65,14 @@ public class HubOAuthTokenService extends HubRequestService {
             final RequestBody requestBody = getRestConnection().createEncodedRequestBody(formDataMap);
             final HttpUrl httpUrl = getRestConnection().createHttpUrl();
             final Request request = getRestConnection().createPostRequest(httpUrl, requestBody);
-            Response response = null;
+
             response = getRestConnection().handleExecuteClientCall(request);
             final String jsonToken = response.body().string();
             token = getRestConnection().getGson().fromJson(jsonToken, Token.class);
         } catch (final IOException e) {
             throw new IntegrationException(e);
+        } finally {
+            response.close();
         }
         return token;
     }
@@ -80,6 +83,7 @@ public class HubOAuthTokenService extends HubRequestService {
 
     public Token refreshClientToken(final String clientId, final String clientSecret) throws IntegrationException {
         Token token = null;
+        Response response = null;
         try {
             final Map<String, String> formDataMap = new LinkedHashMap<>();
             formDataMap.put("grant_type", "client_credentials");
@@ -93,12 +97,13 @@ public class HubOAuthTokenService extends HubRequestService {
             final RequestBody requestBody = getRestConnection().createEncodedRequestBody(formDataMap);
             final HttpUrl httpUrl = getRestConnection().createHttpUrl();
             final Request request = getRestConnection().createPostRequest(httpUrl, requestBody);
-            Response response = null;
             response = getRestConnection().handleExecuteClientCall(request);
             final String jsonToken = response.body().string();
             token = getRestConnection().getGson().fromJson(jsonToken, Token.class);
         } catch (final IOException e) {
             throw new IntegrationException(e);
+        } finally {
+            response.close();
         }
         return token;
     }
@@ -109,6 +114,7 @@ public class HubOAuthTokenService extends HubRequestService {
 
     public Token refreshUserToken(final String clientId, final String clientSecret, final String refreshToken) throws IntegrationException {
         Token token = null;
+        Response response = null;
         try {
             final Map<String, String> formDataMap = new LinkedHashMap<>();
             formDataMap.put("grant_type", "refresh_token");
@@ -122,12 +128,13 @@ public class HubOAuthTokenService extends HubRequestService {
             final RequestBody requestBody = getRestConnection().createEncodedRequestBody(formDataMap);
             final HttpUrl httpUrl = getRestConnection().createHttpUrl();
             final Request request = getRestConnection().createPostRequest(httpUrl, requestBody);
-            Response response = null;
             response = getRestConnection().handleExecuteClientCall(request);
             final String jsonToken = response.body().string();
             token = getRestConnection().getGson().fromJson(jsonToken, Token.class);
         } catch (final IOException e) {
             throw new IntegrationException(e);
+        } finally {
+            response.close();
         }
         return token;
     }
