@@ -23,13 +23,17 @@
  */
 package com.blackducksoftware.integration.hub.service;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import com.blackducksoftware.integration.exception.IntegrationException;
-import com.blackducksoftware.integration.hub.api.item.HubResponse;
+import com.blackducksoftware.integration.hub.api.item.HubPagedResponse;
+import com.blackducksoftware.integration.hub.request.HubPagedRequest;
 import com.blackducksoftware.integration.hub.request.HubRequest;
 import com.blackducksoftware.integration.hub.request.HubRequestFactory;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
@@ -55,28 +59,81 @@ public class HubRequestService {
         return jsonObject;
     }
 
-    public <T extends HubResponse> T getItem(final HubRequest hubRequest, final Class<T> clazz) throws IntegrationException {
+    public <T> T getItem(final String url, final Class<T> clazz) throws IntegrationException {
+        final HubRequest hubRequest = getHubRequestFactory().createRequest(url);
         final String response = hubRequest.executeGetForResponseString();
         final T item = getRestConnection().getGson().fromJson(response, clazz);
-        item.setJson(response);
         return item;
     }
 
-    public <T extends HubResponse> T getItem(final String url, final Class<T> clazz) throws IntegrationException {
-        final HubRequest hubRequest = getHubRequestFactory().createRequest(url);
-        return getItem(hubRequest, clazz);
-    }
-
-    public <T extends HubResponse> T getItem(final JsonObject jsonObject, final Class<T> clazz) {
+    public <T> T getItem(final JsonObject jsonObject, final Class<T> clazz) {
         final T item = getRestConnection().getGson().fromJson(jsonObject, clazz);
-        item.setJson(jsonObject.toString());
         return item;
     }
 
-    public <T extends HubResponse> T getItem(final JsonElement jsonElement, final Class<T> clazz) {
+    public <T> T getItem(final JsonElement jsonElement, final Class<T> clazz) {
         final T item = getRestConnection().getGson().fromJson(jsonElement, clazz);
-        item.setJson(jsonElement.toString());
         return item;
+    }
+
+    public <T> List<T> getItems(final HubPagedRequest hubPagedRequest, final Class<T> clazz) throws IntegrationException {
+        final JsonObject jsonObject = hubPagedRequest.executeGetForResponseJson();
+        final List<T> items = getItems(jsonObject, clazz);
+        return items;
+    }
+
+    /**
+     * This method can be overridden by subclasses to provide special treatment for extracting the items from the
+     * jsonObject.
+     */
+    public <T> List<T> getItems(final JsonObject jsonObject, final Class<T> clazz) {
+        final LinkedList<T> itemList = new LinkedList<>();
+        final JsonElement itemsElement = jsonObject.get("items");
+        final JsonArray itemsArray = itemsElement.getAsJsonArray();
+        final int count = itemsArray.size();
+        for (int index = 0; index < count; index++) {
+            final JsonElement element = itemsArray.get(index);
+            final T item = getItem(element, clazz);
+            itemList.add(item);
+        }
+        return itemList;
+    }
+
+    public <T> List<T> getAllItems(final HubPagedRequest hubPagedRequest, final Class<T> clazz) throws IntegrationException {
+        final List<T> allItems = new ArrayList<>();
+
+        final HubPagedResponse<T> firstPage = getPagedResponse(hubPagedRequest, clazz);
+        final int totalCount = firstPage.getTotalCount();
+        final List<T> items = firstPage.getItems();
+        allItems.addAll(items);
+
+        while (allItems.size() < totalCount) {
+            final int currentOffset = hubPagedRequest.getOffset();
+            final int increasedOffset = currentOffset + items.size();
+
+            hubPagedRequest.setOffset(increasedOffset);
+            final HubPagedResponse<T> nextPage = getPagedResponse(hubPagedRequest, clazz);
+            allItems.addAll(nextPage.getItems());
+        }
+
+        return allItems;
+    }
+
+    private <T> HubPagedResponse<T> getPagedResponse(final HubPagedRequest hubPagedRequest, final Class<T> clazz) throws IntegrationException {
+        final JsonObject jsonObject = hubPagedRequest.executeGetForResponseJson();
+        final int totalCount = jsonObject.get("totalCount").getAsInt();
+        final List<T> items = getItems(jsonObject, clazz);
+        return new HubPagedResponse<>(totalCount, items);
+    }
+
+    public <T> List<T> getAllItems(final List<String> urlSegments, final Class<T> clazz) throws IntegrationException {
+        final HubPagedRequest hubPagedRequest = getHubRequestFactory().createPagedRequest(urlSegments);
+        return getAllItems(hubPagedRequest, clazz);
+    }
+
+    public <T> List<T> getAllItems(final String url, final Class<T> clazz) throws IntegrationException {
+        final HubPagedRequest hubPagedRequest = getHubRequestFactory().createPagedRequest(url);
+        return getAllItems(hubPagedRequest, clazz);
     }
 
     public void deleteItem(final String url) throws IntegrationException {
