@@ -1,4 +1,6 @@
-/*******************************************************************************
+/**
+ * Hub Rest Common
+ *
  * Copyright (C) 2017 Black Duck Software, Inc.
  * http://www.blackducksoftware.com/
  *
@@ -18,7 +20,7 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations
  * under the License.
- *******************************************************************************/
+ */
 package com.blackducksoftware.integration.hub.service;
 
 import java.io.IOException;
@@ -72,7 +74,9 @@ public class HubOAuthTokenService extends HubRequestService {
         } catch (final IOException e) {
             throw new IntegrationException(e);
         } finally {
-            response.close();
+            if (response != null) {
+                response.close();
+            }
         }
         return token;
     }
@@ -103,7 +107,9 @@ public class HubOAuthTokenService extends HubRequestService {
         } catch (final IOException e) {
             throw new IntegrationException(e);
         } finally {
-            response.close();
+            if (response != null) {
+                response.close();
+            }
         }
         return token;
     }
@@ -134,7 +140,9 @@ public class HubOAuthTokenService extends HubRequestService {
         } catch (final IOException e) {
             throw new IntegrationException(e);
         } finally {
-            response.close();
+            if (response != null) {
+                response.close();
+            }
         }
         return token;
     }
