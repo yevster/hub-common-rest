@@ -103,10 +103,10 @@ public class HubRequest {
         return restConnection.handleExecuteClientCall(request);
     }
 
-    public Response executeDelete() throws IntegrationException {
+    public void executeDelete() throws IntegrationException {
         final HttpUrl httpUrl = buildHttpUrl();
         final Request request = restConnection.createDeleteRequest(httpUrl);
-        return restConnection.handleExecuteClientCall(request);
+        restConnection.handleExecuteClientCall(request).close();
     }
 
     public void populateQueryParameters() {
