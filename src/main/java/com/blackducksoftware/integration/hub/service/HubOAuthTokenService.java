@@ -104,7 +104,7 @@ public class HubOAuthTokenService {
         Response response = null;
         try {
             final HubRequest request = hubRequestFactory.createRequest();
-            response = request.executeEncodedPost(formDataMap);
+            response = request.executeEncodedFormPost(formDataMap);
             final String jsonToken = response.body().string();
             return restConnection.getGson().fromJson(jsonToken, Token.class);
         } catch (final IOException e) {

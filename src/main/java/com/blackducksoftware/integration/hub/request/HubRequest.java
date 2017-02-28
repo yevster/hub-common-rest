@@ -67,9 +67,9 @@ public class HubRequest {
         return restConnection.handleExecuteClientCall(request);
     }
 
-    public Response executeEncodedPost(final Map<String, String> contentMap) throws IntegrationException {
+    public Response executeEncodedFormPost(final Map<String, String> contentMap) throws IntegrationException {
         final HttpUrl httpUrl = buildHttpUrl();
-        final Request request = restConnection.createPostRequest(httpUrl, restConnection.createEncodedRequestBody(contentMap));
+        final Request request = restConnection.createPostRequest(httpUrl, restConnection.createEncodedFormBody(contentMap));
         return restConnection.handleExecuteClientCall(request);
     }
 
@@ -85,9 +85,9 @@ public class HubRequest {
         return restConnection.handleExecuteClientCall(request);
     }
 
-    public Response executeEncodedPut(final Map<String, String> contentMap) throws IntegrationException {
+    public Response executeEncodedFormPut(final Map<String, String> contentMap) throws IntegrationException {
         final HttpUrl httpUrl = buildHttpUrl();
-        final Request request = restConnection.createPutRequest(httpUrl, restConnection.createEncodedRequestBody(contentMap));
+        final Request request = restConnection.createPutRequest(httpUrl, restConnection.createEncodedFormBody(contentMap));
         return restConnection.handleExecuteClientCall(request);
     }
 
@@ -115,12 +115,16 @@ public class HubRequest {
         }
     }
 
-    private HttpUrl buildHttpUrl() {
+    public HttpUrl buildHttpUrl() {
         populateQueryParameters();
         if (StringUtils.isBlank(url)) {
             url = restConnection.getHubBaseUrl().toString();
         }
         return restConnection.createHttpUrl(url, urlSegments, queryParameters);
+    }
+
+    public RestConnection getRestConnection() {
+        return restConnection;
     }
 
     public String getUrl() {

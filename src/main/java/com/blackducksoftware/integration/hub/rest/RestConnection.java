@@ -199,7 +199,7 @@ public abstract class RestConnection {
         return RequestBody.create(MediaType.parse(mediaType), content);
     }
 
-    public RequestBody createEncodedRequestBody(final Map<String, String> content) {
+    public RequestBody createEncodedFormBody(final Map<String, String> content) {
         final FormBody.Builder builder = new FormBody.Builder();
         for (final Entry<String, String> contentEntry : content.entrySet()) {
             builder.addEncoded(contentEntry.getKey(), contentEntry.getValue());
