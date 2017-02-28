@@ -101,18 +101,12 @@ public class HubOAuthTokenService {
     }
 
     private Token getTokenFromEncodedPost(final Map<String, String> formDataMap) throws IntegrationException {
-        Response response = null;
-        try {
-            final HubRequest request = hubRequestFactory.createRequest();
-            response = request.executeEncodedFormPost(formDataMap);
+        final HubRequest request = hubRequestFactory.createRequest();
+        try (Response response = request.executeEncodedFormPost(formDataMap)) {
             final String jsonToken = response.body().string();
             return restConnection.getGson().fromJson(jsonToken, Token.class);
         } catch (final IOException e) {
             throw new IntegrationException(e);
-        } finally {
-            if (response != null) {
-                response.close();
-            }
         }
     }
 

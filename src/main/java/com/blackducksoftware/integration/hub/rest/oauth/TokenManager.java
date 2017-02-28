@@ -32,6 +32,7 @@ import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.api.oauth.OAuthConfiguration;
 import com.blackducksoftware.integration.hub.api.oauth.Token;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
+import com.blackducksoftware.integration.hub.rest.UnAuthenticatedRestConnection;
 import com.blackducksoftware.integration.hub.service.HubOAuthTokenService;
 import com.blackducksoftware.integration.log.IntLogger;
 
@@ -72,18 +73,7 @@ public class TokenManager {
         Token result = null;
         try {
             final URL url = new URL(configuration.tokenUri);
-            final RestConnection connection = new RestConnection(logger, url, timeout) {
-
-                @Override
-                public void clientAuthenticate() throws IntegrationException {
-
-                }
-
-                @Override
-                public void addBuilderAuthentication() throws IntegrationException {
-
-                }
-            };
+            final RestConnection connection = new UnAuthenticatedRestConnection(logger, url, timeout);
 
             final HubOAuthTokenService tokenService = new HubOAuthTokenService(connection);
             result = tokenService.requestUserToken(configuration.clientId, authorizationCode, configuration.callbackUrl);
@@ -129,18 +119,7 @@ public class TokenManager {
         if (StringUtils.isNotBlank(configuration.refreshToken)) {
             try {
                 final URL url = new URL(configuration.tokenUri);
-                final RestConnection connection = new RestConnection(logger, url, timeout) {
-
-                    @Override
-                    public void clientAuthenticate() throws IntegrationException {
-
-                    }
-
-                    @Override
-                    public void addBuilderAuthentication() throws IntegrationException {
-
-                    }
-                };
+                final RestConnection connection = new UnAuthenticatedRestConnection(logger, url, timeout);
 
                 final HubOAuthTokenService tokenService = new HubOAuthTokenService(connection);
                 result = tokenService.refreshUserToken(configuration.clientId,
@@ -160,18 +139,7 @@ public class TokenManager {
         Token result = null;
         try {
             final URL url = new URL(configuration.tokenUri);
-            final RestConnection connection = new RestConnection(logger, url, timeout) {
-
-                @Override
-                public void clientAuthenticate() throws IntegrationException {
-
-                }
-
-                @Override
-                public void addBuilderAuthentication() throws IntegrationException {
-
-                }
-            };
+            final RestConnection connection = new UnAuthenticatedRestConnection(logger, url, timeout);
 
             final HubOAuthTokenService tokenService = new HubOAuthTokenService(connection);
             result = tokenService.refreshClientToken(configuration.clientId);
