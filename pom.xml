@@ -13,13 +13,13 @@
 
   <name>Hub Rest Common</name>
   <description>General Code for Rest Connections to the Hub</description>
-  <url>https://www.github.com/blackducksoftware/hub-rest-common</url>
+  <url>https://www.github.com/blackducksoftware/hub-common-rest</url>
   <inceptionYear>2017</inceptionYear>
 
   <scm>
-    <connection>scm:git:git://github.com/blackducksoftware/hub-rest-common.git/</connection>
-    <developerConnection>scm:git:git@github.com:blackducksoftware/hub-rest-common.git</developerConnection>
-    <url>https://www.github.com/blackducksoftware/hub-rest-common</url>
+    <connection>scm:git:git://github.com/blackducksoftware/hub-common-rest.git/</connection>
+    <developerConnection>scm:git:git@github.com:blackducksoftware/hub-common-rest.git</developerConnection>
+    <url>https://www.github.com/blackducksoftware/hub-common-rest</url>
   </scm>
 
   <dependencies>
