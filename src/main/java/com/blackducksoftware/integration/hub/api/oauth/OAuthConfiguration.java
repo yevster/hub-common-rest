@@ -34,5 +34,5 @@ public class OAuthConfiguration {
 
     public String tokenUri;
 
-    public String refreshToken; // preiously persisted refresh token
+    public String refreshToken; // previously persisted refresh token
 }

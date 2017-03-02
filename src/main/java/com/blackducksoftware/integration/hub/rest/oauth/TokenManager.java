@@ -37,6 +37,7 @@ import com.blackducksoftware.integration.hub.service.HubOAuthTokenService;
 import com.blackducksoftware.integration.log.IntLogger;
 
 public class TokenManager {
+    public static final String WWW_AUTH_RESP = "Authorization";
 
     private final IntLogger logger;
 
@@ -67,6 +68,10 @@ public class TokenManager {
 
     public void setConfiguration(final OAuthConfiguration configuration) {
         this.configuration = configuration;
+    }
+
+    public String createTokenCredential(final String token) {
+        return String.format("Bearer %s", token);
     }
 
     public Token exchangeForUserToken(final String authorizationCode) throws IntegrationException {
