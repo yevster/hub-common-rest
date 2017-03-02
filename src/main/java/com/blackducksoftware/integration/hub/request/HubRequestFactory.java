@@ -107,9 +107,7 @@ public class HubRequestFactory {
     }
 
     public HubRequest createRequest() {
-        final HubRequest hubRequest = new HubRequest(restConnection);
-        hubRequest.url = restConnection.hubBaseUrl.toString();
-        return hubRequest;
+        return new HubRequest(restConnection);
     }
 
 }

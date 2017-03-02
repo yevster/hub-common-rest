@@ -134,12 +134,12 @@ public class HubRequest {
     }
 
     public HubRequest addQueryParameter(final String queryParameterName, final String queryParameterValue) {
-        queryParameters.put(queryParameterName, queryParameterValue);
+        this.queryParameters.put(queryParameterName, queryParameterValue);
         return this;
     }
 
     public HubRequest addQueryParameters(final Map<String, String> queryParameters) {
-        queryParameters.putAll(queryParameters);
+        this.queryParameters.putAll(queryParameters);
         return this;
     }
 

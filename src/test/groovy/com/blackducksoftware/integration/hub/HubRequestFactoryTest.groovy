@@ -100,6 +100,13 @@ class HubRequestFactoryTest {
         assert GOOGLE_URL_STRING.equals(pagedRequest.url)
         assert pagedRequest.queryParameters.isEmpty()
 
+        pagedRequest = hubRequestFactory.createPagedRequest(-245, GOOGLE_URL_STRING)
+        assert -245 == pagedRequest.limit
+        assert pagedRequest.urlSegments.isEmpty()
+        assert null == pagedRequest.q
+        assert GOOGLE_URL_STRING.equals(pagedRequest.url)
+        assert pagedRequest.queryParameters.isEmpty()
+
         pagedRequest = hubRequestFactory.createPagedRequest(GOOGLE_URL_STRING, q)
         assert 100 == pagedRequest.limit
         assert pagedRequest.urlSegments.isEmpty()
@@ -113,6 +120,9 @@ class HubRequestFactoryTest {
         assert q.equals(pagedRequest.q)
         assert GOOGLE_URL_STRING.equals(pagedRequest.url)
         assert pagedRequest.queryParameters.isEmpty()
+
+        pagedRequest.addQueryParameters([name:"put"])
+        assert !pagedRequest.queryParameters.isEmpty()
     }
 
     @Test
@@ -135,8 +145,18 @@ class HubRequestFactoryTest {
 
         request = hubRequestFactory.createRequest()
         assert request.urlSegments.isEmpty()
-        assert GOOGLE_URL_STRING.equals(request.url)
+        assert null == request.url
         assert null == request.q
         assert request.queryParameters.isEmpty()
+
+        request.addQueryParameters([name:"put"])
+        request.addUrlSegment("hello")
+        String q = "query"
+        request.q = q
+        assert !request.urlSegments.isEmpty()
+        assert !request.queryParameters.isEmpty()
+        assert q.equals(request.q)
+
+        assert request.toString().contains("restConnection")
     }
 }

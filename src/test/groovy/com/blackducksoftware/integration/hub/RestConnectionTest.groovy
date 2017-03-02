@@ -101,6 +101,13 @@ class RestConnectionTest {
     }
 
     @Test
+    public void testToString(){
+        RestConnection restConnection = getRestConnection()
+        String s  = "RestConnection [baseUrl=$GOOGLE_URL_STRING]"
+        assert s.equals(restConnection.toString())
+    }
+
+    @Test
     public void testCreatingHttpUrl(){
         RestConnection restConnection = getRestConnection()
         assert GOOGLE_URL_STRING == restConnection.createHttpUrl().url

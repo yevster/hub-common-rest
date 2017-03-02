@@ -25,6 +25,7 @@ package com.blackducksoftware.integration.hub
 
 import org.junit.Test
 
+import com.blackducksoftware.integration.hub.request.HubPagedRequest
 import com.blackducksoftware.integration.hub.request.HubRequest
 import com.blackducksoftware.integration.hub.request.HubRequestFactory
 import com.blackducksoftware.integration.hub.rest.RestConnection
@@ -52,10 +53,24 @@ class HubRequestExecutionTest {
     }
 
     @Test
+    public void testExecuteGetWithQuery(){
+        HubRequestFactory hubRequestFactory = new HubRequestFactory(getRestConnection())
+        HubRequest request = hubRequestFactory.createRequest()
+        request.q = "query"
+        request.executeGet().withCloseable{ assert 200 == it.code }
+    }
+
+    @Test
     public void testExecutePagedGet(){
         HubRequestFactory hubRequestFactory = new HubRequestFactory(getRestConnection())
-        HubRequest request = hubRequestFactory.createPagedRequest(GOOGLE_URL_STRING)
+        HubPagedRequest request = hubRequestFactory.createPagedRequest(GOOGLE_URL_STRING)
         request.executeGet().withCloseable{ assert 200 == it.code }
+
+        request = hubRequestFactory.createPagedRequest(-245, GOOGLE_URL_STRING)
+        request.executeGet().withCloseable{
+            assert 200 == it.code
+            assert it.request.url.url.contains('limit=10')
+        }
     }
 
     @Test
