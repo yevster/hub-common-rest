@@ -43,7 +43,6 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class CredentialsRestConnection extends RestConnection {
-
     private final String hubUsername;
 
     private final String hubPassword;
@@ -78,7 +77,7 @@ public class CredentialsRestConnection extends RestConnection {
 
             content.put("j_username", hubUsername);
             content.put("j_password", hubPassword);
-            final Request request = createPostRequest(httpUrl, createEncodedRequestBody(content));
+            final Request request = createPostRequest(httpUrl, createEncodedFormBody(content));
             Response response = null;
             try {
                 logRequestHeaders(request);

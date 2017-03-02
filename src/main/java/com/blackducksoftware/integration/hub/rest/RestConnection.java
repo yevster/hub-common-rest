@@ -27,7 +27,6 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URL;
-import java.net.URLConnection;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -70,6 +69,8 @@ public abstract class RestConnection {
     private final JsonParser jsonParser = new JsonParser();
 
     private final OkHttpClient.Builder builder = new OkHttpClient.Builder();
+
+    private final Map<String, String> requestHeaders = new HashMap<>();
 
     private final URL hubBaseUrl;
 
@@ -173,17 +174,12 @@ public abstract class RestConnection {
         }
     }
 
-    public URLConnection openConnection(final URL url) throws IOException {
-        final Proxy proxy = getProxy(url);
-        return url.openConnection(proxy);
-    }
-
-    public Proxy getProxy(final URL hubUrl) {
+    private Proxy getProxy(final URL hubUrl) {
         final Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(getProxyHost(), getProxyPort()));
         return proxy;
     }
 
-    public boolean shouldUseProxyForUrl(final URL url) {
+    private boolean shouldUseProxyForUrl(final URL url) {
         if (StringUtils.isBlank(getProxyHost()) || getProxyPort() <= 0) {
             return false;
         }
@@ -199,7 +195,7 @@ public abstract class RestConnection {
         return RequestBody.create(MediaType.parse(mediaType), content);
     }
 
-    public RequestBody createEncodedRequestBody(final Map<String, String> content) {
+    public RequestBody createEncodedFormBody(final Map<String, String> content) {
         final FormBody.Builder builder = new FormBody.Builder();
         for (final Entry<String, String> contentEntry : content.entrySet()) {
             builder.addEncoded(contentEntry.getKey(), contentEntry.getValue());
@@ -218,29 +214,42 @@ public abstract class RestConnection {
     }
 
     public Request createGetRequest(final HttpUrl httpUrl, final Map<String, String> headers) {
-        final Request.Builder requestBuilder = new Request.Builder();
-        for (final Entry<String, String> header : headers.entrySet()) {
-            requestBuilder.addHeader(header.getKey(), header.getValue());
-        }
-        return requestBuilder
+        return getRequestBuilder(headers)
                 .url(httpUrl).get().build();
     }
 
     public Request createPostRequest(final HttpUrl httpUrl, final RequestBody body) {
-        return new Request.Builder()
+        return getRequestBuilder()
                 .url(httpUrl)
                 .post(body).build();
     }
 
     public Request createPutRequest(final HttpUrl httpUrl, final RequestBody body) {
-        return new Request.Builder()
+        return getRequestBuilder()
                 .url(httpUrl)
                 .put(body).build();
     }
 
     public Request createDeleteRequest(final HttpUrl httpUrl) {
-        return new Request.Builder()
+        return getRequestBuilder()
                 .url(httpUrl).delete().build();
+    }
+
+    private Request.Builder getRequestBuilder() {
+        return getRequestBuilder(null);
+    }
+
+    private Request.Builder getRequestBuilder(final Map<String, String> headers) {
+        final Request.Builder builder = new Request.Builder();
+        final Map<String, String> requestHeaders = getCommonRequestHeaders();
+        requestHeaders.putAll(getCommonRequestHeaders());
+        if (headers != null) {
+            requestHeaders.putAll(headers);
+        }
+        for (final Entry<String, String> header : requestHeaders.entrySet()) {
+            builder.addHeader(header.getKey(), header.getValue());
+        }
+        return builder;
     }
 
     public Response handleExecuteClientCall(final Request request) throws IntegrationException {
@@ -328,6 +337,10 @@ public abstract class RestConnection {
     @Override
     public String toString() {
         return "RestConnection [baseUrl=" + getHubBaseUrl() + "]";
+    }
+
+    public Map<String, String> getCommonRequestHeaders() {
+        return requestHeaders;
     }
 
     protected OkHttpClient.Builder getBuilder() {

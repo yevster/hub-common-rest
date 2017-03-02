@@ -31,17 +31,20 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.api.oauth.Token;
+import com.blackducksoftware.integration.hub.request.HubRequest;
+import com.blackducksoftware.integration.hub.request.HubRequestFactory;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
 
-import okhttp3.HttpUrl;
-import okhttp3.Request;
-import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class HubOAuthTokenService extends HubRequestService {
+public class HubOAuthTokenService {
+    private final RestConnection restConnection;
+
+    private final HubRequestFactory hubRequestFactory;
 
     public HubOAuthTokenService(final RestConnection restConnection) {
-        super(restConnection);
+        this.restConnection = restConnection;
+        this.hubRequestFactory = new HubRequestFactory(restConnection);
     }
 
     public Token requestUserToken(final String clientId, final String authCode, final String redirectUri)
@@ -51,34 +54,16 @@ public class HubOAuthTokenService extends HubRequestService {
 
     public Token requestUserToken(final String clientId, final String clientSecret, final String authCode, final String redirectUri)
             throws IntegrationException {
-        Token token = null;
-        Response response = null;
-        try {
-            final Map<String, String> formDataMap = new LinkedHashMap<>();
-            formDataMap.put("grant_type", "authorization_code");
-            formDataMap.put("redirect_uri", redirectUri);
-            formDataMap.put("client_id", clientId);
-            formDataMap.put("code", authCode);
+        final Map<String, String> formDataMap = new LinkedHashMap<>();
+        formDataMap.put("grant_type", "authorization_code");
+        formDataMap.put("redirect_uri", redirectUri);
+        formDataMap.put("client_id", clientId);
+        formDataMap.put("code", authCode);
 
-            if (StringUtils.isNotBlank(clientSecret)) {
-                formDataMap.put("client_secret", clientSecret);
-            }
-
-            final RequestBody requestBody = getRestConnection().createEncodedRequestBody(formDataMap);
-            final HttpUrl httpUrl = getRestConnection().createHttpUrl();
-            final Request request = getRestConnection().createPostRequest(httpUrl, requestBody);
-
-            response = getRestConnection().handleExecuteClientCall(request);
-            final String jsonToken = response.body().string();
-            token = getRestConnection().getGson().fromJson(jsonToken, Token.class);
-        } catch (final IOException e) {
-            throw new IntegrationException(e);
-        } finally {
-            if (response != null) {
-                response.close();
-            }
+        if (StringUtils.isNotBlank(clientSecret)) {
+            formDataMap.put("client_secret", clientSecret);
         }
-        return token;
+        return getTokenFromEncodedPost(formDataMap);
     }
 
     public Token refreshClientToken(final String clientId) throws IntegrationException {
@@ -86,32 +71,16 @@ public class HubOAuthTokenService extends HubRequestService {
     }
 
     public Token refreshClientToken(final String clientId, final String clientSecret) throws IntegrationException {
-        Token token = null;
-        Response response = null;
-        try {
-            final Map<String, String> formDataMap = new LinkedHashMap<>();
-            formDataMap.put("grant_type", "client_credentials");
-            formDataMap.put("scope", "read write");
-            formDataMap.put("client_id", clientId);
+        final Map<String, String> formDataMap = new LinkedHashMap<>();
+        formDataMap.put("grant_type", "client_credentials");
+        formDataMap.put("scope", "read write");
+        formDataMap.put("client_id", clientId);
 
-            if (StringUtils.isNotBlank(clientSecret)) {
-                formDataMap.put("client_secret", clientSecret);
-            }
-
-            final RequestBody requestBody = getRestConnection().createEncodedRequestBody(formDataMap);
-            final HttpUrl httpUrl = getRestConnection().createHttpUrl();
-            final Request request = getRestConnection().createPostRequest(httpUrl, requestBody);
-            response = getRestConnection().handleExecuteClientCall(request);
-            final String jsonToken = response.body().string();
-            token = getRestConnection().getGson().fromJson(jsonToken, Token.class);
-        } catch (final IOException e) {
-            throw new IntegrationException(e);
-        } finally {
-            if (response != null) {
-                response.close();
-            }
+        if (StringUtils.isNotBlank(clientSecret)) {
+            formDataMap.put("client_secret", clientSecret);
         }
-        return token;
+
+        return getTokenFromEncodedPost(formDataMap);
     }
 
     public Token refreshUserToken(final String clientId, final String refreshToken) throws IntegrationException {
@@ -119,32 +88,25 @@ public class HubOAuthTokenService extends HubRequestService {
     }
 
     public Token refreshUserToken(final String clientId, final String clientSecret, final String refreshToken) throws IntegrationException {
-        Token token = null;
-        Response response = null;
-        try {
-            final Map<String, String> formDataMap = new LinkedHashMap<>();
-            formDataMap.put("grant_type", "refresh_token");
-            formDataMap.put("refresh_token", refreshToken);
-            formDataMap.put("client_id", clientId);
+        final Map<String, String> formDataMap = new LinkedHashMap<>();
+        formDataMap.put("grant_type", "refresh_token");
+        formDataMap.put("refresh_token", refreshToken);
+        formDataMap.put("client_id", clientId);
 
-            if (StringUtils.isNotBlank(clientSecret)) {
-                formDataMap.put("client_secret", clientSecret);
-            }
+        if (StringUtils.isNotBlank(clientSecret)) {
+            formDataMap.put("client_secret", clientSecret);
+        }
+        return getTokenFromEncodedPost(formDataMap);
+    }
 
-            final RequestBody requestBody = getRestConnection().createEncodedRequestBody(formDataMap);
-            final HttpUrl httpUrl = getRestConnection().createHttpUrl();
-            final Request request = getRestConnection().createPostRequest(httpUrl, requestBody);
-            response = getRestConnection().handleExecuteClientCall(request);
+    private Token getTokenFromEncodedPost(final Map<String, String> formDataMap) throws IntegrationException {
+        final HubRequest request = hubRequestFactory.createRequest();
+        try (Response response = request.executeEncodedFormPost(formDataMap)) {
             final String jsonToken = response.body().string();
-            token = getRestConnection().getGson().fromJson(jsonToken, Token.class);
+            return restConnection.getGson().fromJson(jsonToken, Token.class);
         } catch (final IOException e) {
             throw new IntegrationException(e);
-        } finally {
-            if (response != null) {
-                response.close();
-            }
         }
-        return token;
     }
 
 }

@@ -21,8 +21,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.blackducksoftware.integration.hub.api.item;
+package com.blackducksoftware.integration.hub.rest;
 
-public class HubItem extends HubResponse {
+import java.net.URL;
 
+import com.blackducksoftware.integration.exception.IntegrationException;
+import com.blackducksoftware.integration.log.IntLogger;
+
+public class UnauthenticatedRestConnection extends RestConnection {
+    public UnauthenticatedRestConnection(final IntLogger logger, final URL hubBaseUrl, final int timeout) {
+        super(logger, hubBaseUrl, timeout);
+    }
+
+    @Override
+    public void addBuilderAuthentication() throws IntegrationException {
+    }
+
+    @Override
+    public void clientAuthenticate() throws IntegrationException {
+    }
 }

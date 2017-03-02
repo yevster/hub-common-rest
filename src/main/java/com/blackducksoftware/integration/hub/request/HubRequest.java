@@ -25,7 +25,6 @@ package com.blackducksoftware.integration.hub.request;
 
 import static com.blackducksoftware.integration.hub.RestConstants.QUERY_Q;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,8 +36,6 @@ import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 
 import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
-import com.blackducksoftware.integration.hub.rest.exception.IntegrationRestException;
-import com.google.gson.JsonObject;
 
 import okhttp3.HttpUrl;
 import okhttp3.Request;
@@ -64,103 +61,57 @@ public class HubRequest {
         this.restConnection = restConnection;
     }
 
-    public JsonObject executeGetForResponseJson() throws IntegrationException {
+    public Response executeGet() throws IntegrationException {
         final HttpUrl httpUrl = buildHttpUrl();
-        Response response = null;
-        try {
-            final Request request = restConnection.createGetRequest(httpUrl);
-            response = restConnection.handleExecuteClientCall(request);
-            final String responseString = response.body().string();
-            final JsonObject jsonObject = restConnection.getJsonParser().parse(responseString).getAsJsonObject();
-            return jsonObject;
-        } catch (final IOException e) {
-            throw new IntegrationRestException(response.code(), response.message(),
-                    "There was a problem getting this item : " + httpUrl.uri().toString() + ". Error : " + e.getMessage(), e);
-        } finally {
-            if (response != null) {
-                response.close();
-            }
-        }
+        final Request request = restConnection.createGetRequest(httpUrl);
+        return restConnection.handleExecuteClientCall(request);
     }
 
-    public String executeGetForResponseString() throws IntegrationException {
+    public Response executeEncodedFormPost(final Map<String, String> contentMap) throws IntegrationException {
         final HttpUrl httpUrl = buildHttpUrl();
-        Response response = null;
-        try {
-            final Request request = restConnection.createGetRequest(httpUrl);
-            response = restConnection.handleExecuteClientCall(request);
-            return response.body().string();
-        } catch (final IOException e) {
-            throw new IntegrationRestException(response.code(), response.message(),
-                    "There was a problem getting this item : " + httpUrl.uri().toString() + ". Error : " + e.getMessage(), e);
-        } finally {
-            if (response != null) {
-                response.close();
-            }
-        }
+        final Request request = restConnection.createPostRequest(httpUrl, restConnection.createEncodedFormBody(contentMap));
+        return restConnection.handleExecuteClientCall(request);
     }
 
-    public String executePost(final String content) throws IntegrationException {
+    public Response executePost(final String content) throws IntegrationException {
         final HttpUrl httpUrl = buildHttpUrl();
-        Response response = null;
-        try {
-            final Request request = restConnection.createPostRequest(httpUrl, restConnection.createJsonRequestBody(content));
-            response = restConnection.handleExecuteClientCall(request);
-            return response.header("location");
-        } finally {
-            if (response != null) {
-                response.close();
-            }
-        }
+        final Request request = restConnection.createPostRequest(httpUrl, restConnection.createJsonRequestBody(content));
+        return restConnection.handleExecuteClientCall(request);
     }
 
-    public String executePost(final String mediaType, final String content) throws IntegrationException {
+    public Response executePost(final String mediaType, final String content) throws IntegrationException {
         final HttpUrl httpUrl = buildHttpUrl();
-        Response response = null;
-        try {
-            final Request request = restConnection.createPostRequest(httpUrl, restConnection.createJsonRequestBody(mediaType, content));
-            response = restConnection.handleExecuteClientCall(request);
-            return response.header("location");
-        } finally {
-            if (response != null) {
-                response.close();
-            }
-        }
+        final Request request = restConnection.createPostRequest(httpUrl, restConnection.createJsonRequestBody(mediaType, content));
+        return restConnection.handleExecuteClientCall(request);
     }
 
-    public void executePut(final String content) throws IntegrationException {
+    public Response executeEncodedFormPut(final Map<String, String> contentMap) throws IntegrationException {
         final HttpUrl httpUrl = buildHttpUrl();
-        Response response = null;
-        try {
-            final Request request = restConnection.createPutRequest(httpUrl, restConnection.createJsonRequestBody(content));
-            response = restConnection.handleExecuteClientCall(request);
-        } finally {
-            if (response != null) {
-                response.close();
-            }
-        }
+        final Request request = restConnection.createPutRequest(httpUrl, restConnection.createEncodedFormBody(contentMap));
+        return restConnection.handleExecuteClientCall(request);
     }
 
-    public void executePut(final String mediaType, final String content) throws IntegrationException {
+    public Response executePut(final String content) throws IntegrationException {
         final HttpUrl httpUrl = buildHttpUrl();
-        Response response = null;
-        try {
-            final Request request = restConnection.createPutRequest(httpUrl, restConnection.createJsonRequestBody(mediaType, content));
-            response = restConnection.handleExecuteClientCall(request);
-        } finally {
-            if (response != null) {
-                response.close();
-            }
-        }
+        final Request request = restConnection.createPutRequest(httpUrl, restConnection.createJsonRequestBody(content));
+        return restConnection.handleExecuteClientCall(request);
+    }
+
+    public Response executePut(final String mediaType, final String content) throws IntegrationException {
+        final HttpUrl httpUrl = buildHttpUrl();
+        final Request request = restConnection.createPutRequest(httpUrl, restConnection.createJsonRequestBody(mediaType, content));
+        return restConnection.handleExecuteClientCall(request);
     }
 
     public void executeDelete() throws IntegrationException {
         final HttpUrl httpUrl = buildHttpUrl();
         final Request request = restConnection.createDeleteRequest(httpUrl);
-        restConnection.handleExecuteClientCall(request);
+        try (Response response = restConnection.handleExecuteClientCall(request)) {
+
+        }
     }
 
-    public void populateQueryParameters() {
+    protected void populateQueryParameters() {
         if (StringUtils.isNotBlank(q)) {
             queryParameters.put(QUERY_Q, q);
         }
@@ -172,6 +123,10 @@ public class HubRequest {
             url = restConnection.getHubBaseUrl().toString();
         }
         return restConnection.createHttpUrl(url, urlSegments, queryParameters);
+    }
+
+    public RestConnection getRestConnection() {
+        return restConnection;
     }
 
     public String getUrl() {

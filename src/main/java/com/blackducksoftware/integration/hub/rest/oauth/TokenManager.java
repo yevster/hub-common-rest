@@ -32,18 +32,18 @@ import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.api.oauth.OAuthConfiguration;
 import com.blackducksoftware.integration.hub.api.oauth.Token;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
+import com.blackducksoftware.integration.hub.rest.UnauthenticatedRestConnection;
 import com.blackducksoftware.integration.hub.service.HubOAuthTokenService;
 import com.blackducksoftware.integration.log.IntLogger;
 
 public class TokenManager {
+    public static final String WWW_AUTH_RESP = "Authorization";
 
     private final IntLogger logger;
 
     private final int timeout;
 
     private OAuthConfiguration configuration;
-
-    private Token userToken;
 
     private Token clientToken;
 
@@ -68,22 +68,15 @@ public class TokenManager {
         this.configuration = configuration;
     }
 
+    public String createTokenCredential(final String token) {
+        return String.format("Bearer %s", token);
+    }
+
     public Token exchangeForUserToken(final String authorizationCode) throws IntegrationException {
         Token result = null;
         try {
             final URL url = new URL(configuration.tokenUri);
-            final RestConnection connection = new RestConnection(logger, url, timeout) {
-
-                @Override
-                public void clientAuthenticate() throws IntegrationException {
-
-                }
-
-                @Override
-                public void addBuilderAuthentication() throws IntegrationException {
-
-                }
-            };
+            final RestConnection connection = new UnauthenticatedRestConnection(logger, url, timeout);
 
             final HubOAuthTokenService tokenService = new HubOAuthTokenService(connection);
             result = tokenService.requestUserToken(configuration.clientId, authorizationCode, configuration.callbackUrl);
@@ -107,13 +100,8 @@ public class TokenManager {
 
     public Token getToken(final AccessType accessType) throws IntegrationException {
         Token result = null;
-
         if (AccessType.USER.equals(accessType)) {
-            if (userToken == null) {
-                result = refreshUserAccessToken();
-            } else {
-                result = userToken;
-            }
+            result = refreshUserAccessToken();
         } else if (AccessType.CLIENT.equals(accessType)) {
             if (clientToken == null) {
                 refreshClientAccessToken();
@@ -129,23 +117,11 @@ public class TokenManager {
         if (StringUtils.isNotBlank(configuration.refreshToken)) {
             try {
                 final URL url = new URL(configuration.tokenUri);
-                final RestConnection connection = new RestConnection(logger, url, timeout) {
-
-                    @Override
-                    public void clientAuthenticate() throws IntegrationException {
-
-                    }
-
-                    @Override
-                    public void addBuilderAuthentication() throws IntegrationException {
-
-                    }
-                };
+                final RestConnection connection = new UnauthenticatedRestConnection(logger, url, timeout);
 
                 final HubOAuthTokenService tokenService = new HubOAuthTokenService(connection);
                 result = tokenService.refreshUserToken(configuration.clientId,
                         configuration.refreshToken);
-                userToken = result;
             } catch (final IntegrationException | MalformedURLException ex) {
                 throw new IntegrationException("Error refreshing user token", ex);
             }
@@ -160,18 +136,7 @@ public class TokenManager {
         Token result = null;
         try {
             final URL url = new URL(configuration.tokenUri);
-            final RestConnection connection = new RestConnection(logger, url, timeout) {
-
-                @Override
-                public void clientAuthenticate() throws IntegrationException {
-
-                }
-
-                @Override
-                public void addBuilderAuthentication() throws IntegrationException {
-
-                }
-            };
+            final RestConnection connection = new UnauthenticatedRestConnection(logger, url, timeout);
 
             final HubOAuthTokenService tokenService = new HubOAuthTokenService(connection);
             result = tokenService.refreshClientToken(configuration.clientId);

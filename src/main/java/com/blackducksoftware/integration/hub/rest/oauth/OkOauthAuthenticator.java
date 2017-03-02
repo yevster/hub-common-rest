@@ -26,7 +26,7 @@ package com.blackducksoftware.integration.hub.rest.oauth;
 import java.io.IOException;
 
 import com.blackducksoftware.integration.exception.IntegrationException;
-import com.blackducksoftware.integration.hub.api.oauth.Token;
+import com.blackducksoftware.integration.hub.rest.RestConnection;
 
 import okhttp3.Authenticator;
 import okhttp3.Request;
@@ -34,16 +34,16 @@ import okhttp3.Response;
 import okhttp3.Route;
 
 public class OkOauthAuthenticator implements Authenticator {
-
-    public static final String WWW_AUTH_RESP = "Authorization";
-
     private final TokenManager tokenManager;
 
     private final AccessType accessType;
 
-    public OkOauthAuthenticator(final TokenManager tokenManager, final AccessType accessType) {
+    private final RestConnection restConnection;
+
+    public OkOauthAuthenticator(final TokenManager tokenManager, final AccessType accessType, final RestConnection restConnection) {
         this.tokenManager = tokenManager;
         this.accessType = accessType;
+        this.restConnection = restConnection;
     }
 
     @Override
@@ -51,23 +51,14 @@ public class OkOauthAuthenticator implements Authenticator {
         if (response.priorResponse() != null) {
             return null;
         } else {
-            final String token = getToken();
-            final String credential = createTokenCredential(token);
-            return response.request().newBuilder().header(WWW_AUTH_RESP, credential).build();
-        }
-    }
-
-    private String createTokenCredential(final String token) {
-        return String.format("Bearer %s", token);
-    }
-
-    private String getToken() throws IOException {
-        Token token;
-        try {
-            token = tokenManager.getToken(accessType);
-            return token.accessToken;
-        } catch (final IntegrationException ex) {
-            throw new IOException("Cannot refresh token", ex);
+            String credential;
+            try {
+                credential = tokenManager.createTokenCredential(tokenManager.getToken(accessType).accessToken);
+            } catch (final IntegrationException e) {
+                throw new IOException("Cannot refresh token", e);
+            }
+            restConnection.getCommonRequestHeaders().put(TokenManager.WWW_AUTH_RESP, credential);
+            return response.request().newBuilder().header(TokenManager.WWW_AUTH_RESP, credential).build();
         }
     }
 }

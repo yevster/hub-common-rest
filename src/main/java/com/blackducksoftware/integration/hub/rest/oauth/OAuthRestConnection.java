@@ -43,7 +43,7 @@ public class OAuthRestConnection extends RestConnection {
 
     @Override
     public void addBuilderAuthentication() throws IntegrationException {
-        getBuilder().authenticator(new OkOauthAuthenticator(tokenManager, accessType));
+        getBuilder().authenticator(new OkOauthAuthenticator(tokenManager, accessType, this));
     }
 
     @Override
