@@ -38,7 +38,6 @@ import com.blackducksoftware.integration.hub.rest.RestConnection;
 import okhttp3.Response;
 
 public class HubOAuthTokenService {
-
     private final RestConnection restConnection;
 
     private final HubRequestFactory hubRequestFactory;

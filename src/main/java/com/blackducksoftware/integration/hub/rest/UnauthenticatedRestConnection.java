@@ -29,7 +29,6 @@ import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.log.IntLogger;
 
 public class UnauthenticatedRestConnection extends RestConnection {
-
     public UnauthenticatedRestConnection(final IntLogger logger, final URL hubBaseUrl, final int timeout) {
         super(logger, hubBaseUrl, timeout);
     }

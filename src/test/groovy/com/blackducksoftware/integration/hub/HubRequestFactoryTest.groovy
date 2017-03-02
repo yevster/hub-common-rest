@@ -38,8 +38,10 @@ class HubRequestFactoryTest {
 
     public static final URL GOOGLE_URL = new URL(GOOGLE_URL_STRING)
 
+    public static final int CONNECTION_TIMEOUT = 213
+
     private RestConnection getRestConnection(){
-        new UnauthenticatedRestConnection(new PrintStreamIntLogger(System.out, LogLevel.INFO), GOOGLE_URL, 213)
+        new UnauthenticatedRestConnection(new PrintStreamIntLogger(System.out, LogLevel.INFO), GOOGLE_URL, CONNECTION_TIMEOUT)
     }
 
     @Test

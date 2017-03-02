@@ -45,8 +45,6 @@ public class TokenManager {
 
     private OAuthConfiguration configuration;
 
-    private Token userToken;
-
     private Token clientToken;
 
     public TokenManager(final IntLogger logger, final int timeout) {
@@ -102,13 +100,8 @@ public class TokenManager {
 
     public Token getToken(final AccessType accessType) throws IntegrationException {
         Token result = null;
-
         if (AccessType.USER.equals(accessType)) {
-            if (userToken == null) {
-                result = refreshUserAccessToken();
-            } else {
-                result = userToken;
-            }
+            result = refreshUserAccessToken();
         } else if (AccessType.CLIENT.equals(accessType)) {
             if (clientToken == null) {
                 refreshClientAccessToken();
@@ -129,7 +122,6 @@ public class TokenManager {
                 final HubOAuthTokenService tokenService = new HubOAuthTokenService(connection);
                 result = tokenService.refreshUserToken(configuration.clientId,
                         configuration.refreshToken);
-                userToken = result;
             } catch (final IntegrationException | MalformedURLException ex) {
                 throw new IntegrationException("Error refreshing user token", ex);
             }

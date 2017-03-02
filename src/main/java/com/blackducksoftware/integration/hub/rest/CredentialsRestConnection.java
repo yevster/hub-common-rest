@@ -43,7 +43,6 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class CredentialsRestConnection extends RestConnection {
-
     private final String hubUsername;
 
     private final String hubPassword;

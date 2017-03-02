@@ -43,8 +43,10 @@ class CredentialsRestConnectionTest {
 
     public static final URL GOOGLE_URL = new URL(GOOGLE_URL_STRING)
 
+    public static final int CONNECTION_TIMEOUT = 213
+
     private RestConnection getRestConnection(OkHttpClient mockClient){
-        new CredentialsRestConnection(new PrintStreamIntLogger(System.out, LogLevel.INFO), GOOGLE_URL, 'TestUser', 'Password', 213){
+        new CredentialsRestConnection(new PrintStreamIntLogger(System.out, LogLevel.INFO), GOOGLE_URL, 'TestUser', 'Password', CONNECTION_TIMEOUT){
                     @Override
                     public void setClient(final OkHttpClient client) {
                         super.setClient(mockClient)
