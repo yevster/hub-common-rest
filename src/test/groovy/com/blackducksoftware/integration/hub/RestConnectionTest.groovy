@@ -49,7 +49,7 @@ class RestConnectionTest {
     public static final int CONNECTION_TIMEOUT = 213
 
     private RestConnection getRestConnection(){
-        new UnauthenticatedRestConnection(new PrintStreamIntLogger(System.out, LogLevel.INFO), GOOGLE_URL, CONNECTION_TIMEOUT)
+        new UnauthenticatedRestConnection(new PrintStreamIntLogger(System.out, LogLevel.TRACE), GOOGLE_URL, CONNECTION_TIMEOUT)
     }
 
     @Test
@@ -104,6 +104,7 @@ class RestConnectionTest {
     public void testCreatingHttpUrl(){
         RestConnection restConnection = getRestConnection()
         assert GOOGLE_URL_STRING == restConnection.createHttpUrl().url
+        assert GOOGLE_URL_STRING == restConnection.createHttpUrl(GOOGLE_URL).url
         assert GOOGLE_URL_STRING == restConnection.createHttpUrl(GOOGLE_URL_STRING).url
         assert GOOGLE_URL_STRING+'test/whatsUp' == restConnection.createHttpUrl(["test", "whatsUp"]).url
         assert GOOGLE_URL_STRING+'test/whatsUp?name=hello&question=who' == restConnection.createHttpUrl(["test", "whatsUp"], [name:'hello', question:'who']).url
