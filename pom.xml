@@ -8,7 +8,7 @@
     <version>2.3.0</version>
   </parent>
 
-  <artifactId>hub-rest-common</artifactId>
+  <artifactId>hub-common-rest</artifactId>
   <version>1.0.0-SNAPSHOT</version>
 
   <name>Hub Rest Common</name>
