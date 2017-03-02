@@ -75,11 +75,11 @@ class RestConnectionTest {
         String proxyUser = "testUser"
         String proxyPassword = "password"
 
-        restConnection.setProxyHost(proxyHost)
-        restConnection.setProxyPort(proxyPort)
-        restConnection.setProxyNoHosts(proxyIgnoredHosts)
-        restConnection.setProxyUsername(proxyUser)
-        restConnection.setProxyPassword(proxyPassword)
+        restConnection.proxyHost = proxyHost
+        restConnection.proxyPort = proxyPort
+        restConnection.proxyNoHosts = proxyIgnoredHosts
+        restConnection.proxyUsername = proxyUser
+        restConnection.proxyPassword = proxyPassword
 
         restConnection.connect()
         realClient = restConnection.client
@@ -88,11 +88,11 @@ class RestConnectionTest {
 
         restConnection = new UnauthenticatedRestConnection(logger, GOOGLE_URL, timeoutSeconds)
         proxyIgnoredHosts = ".*"
-        restConnection.setProxyHost(proxyHost)
-        restConnection.setProxyPort(proxyPort)
-        restConnection.setProxyNoHosts(proxyIgnoredHosts)
-        restConnection.setProxyUsername(proxyUser)
-        restConnection.setProxyPassword(proxyPassword)
+        restConnection.proxyHost = proxyHost
+        restConnection.proxyPort = proxyPort
+        restConnection.proxyNoHosts = proxyIgnoredHosts
+        restConnection.proxyUsername = proxyUser
+        restConnection.proxyPassword = proxyPassword
 
         restConnection.connect()
         realClient = restConnection.client
@@ -139,7 +139,7 @@ class RestConnectionTest {
     @Test
     public void testCreatingGetRequest(){
         RestConnection restConnection = getRestConnection()
-        restConnection.getCommonRequestHeaders().put("Common", "Header")
+        restConnection.commonRequestHeaders.put("Common", "Header")
         HttpUrl httpUrl = restConnection.createHttpUrl()
         Request request = restConnection.createGetRequest(httpUrl)
         assert "GET".equals(request.method)
@@ -154,7 +154,7 @@ class RestConnectionTest {
         assert mediaType.equals(request.header("Accept"))
         assert "Header".equals(request.header("Common"))
 
-        restConnection.getCommonRequestHeaders().remove("Common")
+        restConnection.commonRequestHeaders.remove("Common")
         request = restConnection.createGetRequest(httpUrl, [name:'hello', question:'who'])
         assert "GET".equals(request.method)
         assert httpUrl == request.url
@@ -166,7 +166,7 @@ class RestConnectionTest {
     @Test
     public void testCreatingPostRequest(){
         RestConnection restConnection = getRestConnection()
-        restConnection.getCommonRequestHeaders().put("Common", "Header")
+        restConnection.commonRequestHeaders.put("Common", "Header")
         HttpUrl httpUrl = restConnection.createHttpUrl()
         RequestBody requestBody = restConnection.createJsonRequestBody("hello")
         Request request = restConnection.createPostRequest(httpUrl,requestBody)
@@ -175,7 +175,7 @@ class RestConnectionTest {
         assert "Header".equals(request.header("Common"))
         assert requestBody == request.body
 
-        restConnection.getCommonRequestHeaders().remove("Common")
+        restConnection.commonRequestHeaders.remove("Common")
         request = restConnection.createPostRequest(httpUrl,requestBody)
         assert "POST".equals(request.method)
         assert httpUrl == request.url
@@ -186,7 +186,7 @@ class RestConnectionTest {
     @Test
     public void testCreatingPutRequest(){
         RestConnection restConnection = getRestConnection()
-        restConnection.getCommonRequestHeaders().put("Common", "Header")
+        restConnection.commonRequestHeaders.put("Common", "Header")
         HttpUrl httpUrl = restConnection.createHttpUrl()
         RequestBody requestBody = restConnection.createJsonRequestBody("hello")
         Request request = restConnection.createPutRequest(httpUrl,requestBody)
@@ -195,7 +195,7 @@ class RestConnectionTest {
         assert "Header".equals(request.header("Common"))
         assert requestBody == request.body
 
-        restConnection.getCommonRequestHeaders().remove("Common")
+        restConnection.commonRequestHeaders.remove("Common")
         request = restConnection.createPutRequest(httpUrl,requestBody)
         assert "PUT".equals(request.method)
         assert httpUrl == request.url
@@ -206,14 +206,14 @@ class RestConnectionTest {
     @Test
     public void testCreatingDeleteRequest(){
         RestConnection restConnection = getRestConnection()
-        restConnection.getCommonRequestHeaders().put("Common", "Header")
+        restConnection.commonRequestHeaders.put("Common", "Header")
         HttpUrl httpUrl = restConnection.createHttpUrl()
         Request request = restConnection.createDeleteRequest(httpUrl)
         assert "DELETE".equals(request.method)
         assert httpUrl == request.url
         assert "Header".equals(request.header("Common"))
 
-        restConnection.getCommonRequestHeaders().remove("Common")
+        restConnection.commonRequestHeaders.remove("Common")
         request = restConnection.createDeleteRequest(httpUrl)
         assert "DELETE".equals(request.method)
         assert httpUrl == request.url
