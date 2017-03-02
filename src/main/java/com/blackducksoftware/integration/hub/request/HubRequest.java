@@ -106,16 +106,18 @@ public class HubRequest {
     public void executeDelete() throws IntegrationException {
         final HttpUrl httpUrl = buildHttpUrl();
         final Request request = restConnection.createDeleteRequest(httpUrl);
-        restConnection.handleExecuteClientCall(request).close();
+        try (Response response = restConnection.handleExecuteClientCall(request)) {
+
+        }
     }
 
-    public void populateQueryParameters() {
+    protected void populateQueryParameters() {
         if (StringUtils.isNotBlank(q)) {
             queryParameters.put(QUERY_Q, q);
         }
     }
 
-    public HttpUrl buildHttpUrl() {
+    private HttpUrl buildHttpUrl() {
         populateQueryParameters();
         if (StringUtils.isBlank(url)) {
             url = restConnection.getHubBaseUrl().toString();

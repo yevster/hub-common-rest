@@ -28,12 +28,7 @@ import static com.blackducksoftware.integration.hub.RestConstants.QUERY_OFFSET;
 
 import java.util.Map;
 
-import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
-
-import okhttp3.HttpUrl;
-import okhttp3.Request;
-import okhttp3.Response;
 
 /**
  * This should be used to communicate to the Hub REST endpoints that can return many items across pages of data. These
@@ -49,7 +44,7 @@ public class HubPagedRequest extends HubRequest {
     }
 
     @Override
-    public void populateQueryParameters() {
+    protected void populateQueryParameters() {
         super.populateQueryParameters();
 
         // if limit is not provided, the default is 10
@@ -72,12 +67,6 @@ public class HubPagedRequest extends HubRequest {
     public HubPagedRequest addQueryParameters(final Map<String, String> queryParameters) {
         super.addQueryParameters(queryParameters);
         return this;
-    }
-
-    public Response executePagedGet() throws IntegrationException {
-        final HttpUrl httpUrl = buildHttpUrl();
-        final Request request = getRestConnection().createGetRequest(httpUrl);
-        return getRestConnection().handleExecuteClientCall(request);
     }
 
     public int getLimit() {

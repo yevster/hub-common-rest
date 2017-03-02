@@ -44,14 +44,14 @@ class CredentialsRestConnectionTest {
     public static final URL GOOGLE_URL = new URL(GOOGLE_URL_STRING)
 
     private RestConnection getRestConnection(OkHttpClient mockClient){
-        RestConnection restConnection = new CredentialsRestConnection(new PrintStreamIntLogger(System.out, LogLevel.INFO), GOOGLE_URL,'TestUser', 'Password', 213){
+        new CredentialsRestConnection(new PrintStreamIntLogger(System.out, LogLevel.INFO), GOOGLE_URL, 'TestUser', 'Password', 213){
                     @Override
                     public void setClient(final OkHttpClient client) {
                         super.setClient(mockClient)
                     }
                 }
-        restConnection
     }
+
 
     private Response getSuccessResponse(){
         Response.Builder builder = new Response.Builder()
@@ -94,5 +94,12 @@ class CredentialsRestConnectionTest {
         }
     }
 
-    //TODO test that the cookie jar is set on the client when it is built by CredentialsRestConnection
+    @Test
+    public void testClientForCookieJar(){
+        RestConnection restConnection = new CredentialsRestConnection(new PrintStreamIntLogger(System.out, LogLevel.INFO), GOOGLE_URL, null, null, 213)
+        HttpUrl httpUrl = restConnection.createHttpUrl()
+        Request request = restConnection.createGetRequest(httpUrl)
+        restConnection.handleExecuteClientCall(request)
+        assert null != restConnection.client.cookieJar
+    }
 }
