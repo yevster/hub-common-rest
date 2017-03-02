@@ -1,5 +1,5 @@
 /**
- * Hub Rest Common
+ * Hub Common Rest
  *
  * Copyright (C) 2017 Black Duck Software, Inc.
  * http://www.blackducksoftware.com/
@@ -103,7 +103,7 @@ public class HubOAuthTokenService {
         final HubRequest request = hubRequestFactory.createRequest();
         try (Response response = request.executeEncodedFormPost(formDataMap)) {
             final String jsonToken = response.body().string();
-            return restConnection.getGson().fromJson(jsonToken, Token.class);
+            return restConnection.gson.fromJson(jsonToken, Token.class);
         } catch (final IOException e) {
             throw new IntegrationException(e);
         }

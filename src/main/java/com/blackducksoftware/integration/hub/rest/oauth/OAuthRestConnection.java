@@ -1,5 +1,5 @@
 /**
- * Hub Rest Common
+ * Hub Common Rest
  *
  * Copyright (C) 2017 Black Duck Software, Inc.
  * http://www.blackducksoftware.com/
@@ -43,7 +43,7 @@ public class OAuthRestConnection extends RestConnection {
 
     @Override
     public void addBuilderAuthentication() throws IntegrationException {
-        getBuilder().authenticator(new OkOauthAuthenticator(tokenManager, accessType, this));
+        builder.authenticator(new OkOauthAuthenticator(tokenManager, accessType, this));
     }
 
     @Override

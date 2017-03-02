@@ -1,5 +1,5 @@
 /**
- * Hub Rest Common
+ * Hub Common Rest
  *
  * Copyright (C) 2017 Black Duck Software, Inc.
  * http://www.blackducksoftware.com/
@@ -36,61 +36,61 @@ public class HubRequestFactory {
 
     public HubPagedRequest createPagedRequest(final List<String> urlSegments) {
         final HubPagedRequest hubPagedRequest = new HubPagedRequest(restConnection);
-        hubPagedRequest.setLimit(100);
+        hubPagedRequest.limit = 100;
         hubPagedRequest.addUrlSegments(urlSegments);
         return hubPagedRequest;
     }
 
     public HubPagedRequest createPagedRequest(final int itemsPerPage, final List<String> urlSegments) {
         final HubPagedRequest hubPagedRequest = new HubPagedRequest(restConnection);
-        hubPagedRequest.setLimit(itemsPerPage);
+        hubPagedRequest.limit = itemsPerPage;
         hubPagedRequest.addUrlSegments(urlSegments);
         return hubPagedRequest;
     }
 
     public HubPagedRequest createPagedRequest(final List<String> urlSegments, final String q) {
         final HubPagedRequest hubPagedRequest = new HubPagedRequest(restConnection);
-        hubPagedRequest.setLimit(100);
+        hubPagedRequest.limit = 100;
         hubPagedRequest.addUrlSegments(urlSegments);
-        hubPagedRequest.setQ(q);
+        hubPagedRequest.q = q;
         return hubPagedRequest;
     }
 
     public HubPagedRequest createPagedRequest(final int itemsPerPage, final List<String> urlSegments, final String q) {
         final HubPagedRequest hubPagedRequest = new HubPagedRequest(restConnection);
-        hubPagedRequest.setLimit(itemsPerPage);
+        hubPagedRequest.limit = itemsPerPage;
         hubPagedRequest.addUrlSegments(urlSegments);
-        hubPagedRequest.setQ(q);
+        hubPagedRequest.q = q;
         return hubPagedRequest;
     }
 
     public HubPagedRequest createPagedRequest(final String url) {
         final HubPagedRequest hubPagedRequest = new HubPagedRequest(restConnection);
-        hubPagedRequest.setLimit(100);
-        hubPagedRequest.setUrl(url);
+        hubPagedRequest.limit = 100;
+        hubPagedRequest.url = url;
         return hubPagedRequest;
     }
 
     public HubPagedRequest createPagedRequest(final int itemsPerPage, final String url) {
         final HubPagedRequest hubPagedRequest = new HubPagedRequest(restConnection);
-        hubPagedRequest.setLimit(itemsPerPage);
-        hubPagedRequest.setUrl(url);
+        hubPagedRequest.limit = itemsPerPage;
+        hubPagedRequest.url = url;
         return hubPagedRequest;
     }
 
     public HubPagedRequest createPagedRequest(final String url, final String q) {
         final HubPagedRequest hubPagedRequest = new HubPagedRequest(restConnection);
-        hubPagedRequest.setLimit(100);
-        hubPagedRequest.setUrl(url);
-        hubPagedRequest.setQ(q);
+        hubPagedRequest.limit = 100;
+        hubPagedRequest.url = url;
+        hubPagedRequest.q = q;
         return hubPagedRequest;
     }
 
     public HubPagedRequest createPagedRequest(final int itemsPerPage, final String url, final String q) {
         final HubPagedRequest hubPagedRequest = new HubPagedRequest(restConnection);
-        hubPagedRequest.setLimit(itemsPerPage);
-        hubPagedRequest.setUrl(url);
-        hubPagedRequest.setQ(q);
+        hubPagedRequest.limit = itemsPerPage;
+        hubPagedRequest.url = url;
+        hubPagedRequest.q = q;
         return hubPagedRequest;
     }
 
@@ -102,13 +102,13 @@ public class HubRequestFactory {
 
     public HubRequest createRequest(final String url) {
         final HubRequest hubRequest = new HubRequest(restConnection);
-        hubRequest.setUrl(url);
+        hubRequest.url = url;
         return hubRequest;
     }
 
     public HubRequest createRequest() {
         final HubRequest hubRequest = new HubRequest(restConnection);
-        hubRequest.setUrl(restConnection.getHubBaseUrl().toString());
+        hubRequest.url = restConnection.hubBaseUrl.toString();
         return hubRequest;
     }
 

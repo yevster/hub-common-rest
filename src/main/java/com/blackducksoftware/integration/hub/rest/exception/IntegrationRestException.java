@@ -1,5 +1,5 @@
 /**
- * Hub Rest Common
+ * Hub Common Rest
  *
  * Copyright (C) 2017 Black Duck Software, Inc.
  * http://www.blackducksoftware.com/
@@ -29,12 +29,6 @@ public class IntegrationRestException extends IntegrationException {
     private final int httpStatusCode;
 
     private final String httpStatusMessage;
-
-    public IntegrationRestException(final int httpStatusCode, final String httpStatusMessage) {
-        super();
-        this.httpStatusCode = httpStatusCode;
-        this.httpStatusMessage = httpStatusMessage;
-    }
 
     public IntegrationRestException(final int httpStatusCode, final String httpStatusMessage, final String message, final Throwable cause,
             final boolean enableSuppression, final boolean writableStackTrace) {

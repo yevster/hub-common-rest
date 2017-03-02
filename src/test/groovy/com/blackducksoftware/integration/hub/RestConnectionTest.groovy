@@ -1,5 +1,5 @@
 /**
- * Hub Rest Common
+ * Hub Common Rest
  *
  * Copyright (C) 2017 Black Duck Software, Inc.
  * http://www.blackducksoftware.com/
@@ -254,5 +254,12 @@ class RestConnectionTest {
         } catch (IntegrationRestException e) {
             assert 404 == e.httpStatusCode
         }
+    }
+
+    @Test
+    public void testParsingDate(){
+        String dateString = '2017-03-02T03:35:23.456Z'
+        Date date = RestConnection.parseDateString(dateString)
+        assert dateString.equals(RestConnection.formatDate(date))
     }
 }

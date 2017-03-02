@@ -1,5 +1,5 @@
 /**
- * Hub Rest Common
+ * Hub Common Rest
  *
  * Copyright (C) 2017 Black Duck Software, Inc.
  * http://www.blackducksoftware.com/
@@ -47,15 +47,15 @@ import okhttp3.Response;
  * that do not consume limit or offset, and those should use this implementation.
  */
 public class HubRequest {
-    private final RestConnection restConnection;
+    public final RestConnection restConnection;
 
-    private String url;
+    public String url;
 
-    private final List<String> urlSegments = new ArrayList<>();
+    public final List<String> urlSegments = new ArrayList<>();
 
-    private final Map<String, String> queryParameters = new HashMap<>();
+    public final Map<String, String> queryParameters = new HashMap<>();
 
-    private String q;
+    public String q;
 
     public HubRequest(final RestConnection restConnection) {
         this.restConnection = restConnection;
@@ -120,25 +120,9 @@ public class HubRequest {
     private HttpUrl buildHttpUrl() {
         populateQueryParameters();
         if (StringUtils.isBlank(url)) {
-            url = restConnection.getHubBaseUrl().toString();
+            url = restConnection.hubBaseUrl.toString();
         }
         return restConnection.createHttpUrl(url, urlSegments, queryParameters);
-    }
-
-    public RestConnection getRestConnection() {
-        return restConnection;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(final String url) {
-        this.url = url;
-    }
-
-    public List<String> getUrlSegments() {
-        return urlSegments;
     }
 
     public void addUrlSegment(final String urlSegment) {
@@ -149,10 +133,6 @@ public class HubRequest {
         urlSegments.addAll(urlSegment);
     }
 
-    public Map<String, String> getQueryParameters() {
-        return queryParameters;
-    }
-
     public HubRequest addQueryParameter(final String queryParameterName, final String queryParameterValue) {
         queryParameters.put(queryParameterName, queryParameterValue);
         return this;
@@ -161,14 +141,6 @@ public class HubRequest {
     public HubRequest addQueryParameters(final Map<String, String> queryParameters) {
         queryParameters.putAll(queryParameters);
         return this;
-    }
-
-    public String getQ() {
-        return q;
-    }
-
-    public void setQ(final String q) {
-        this.q = q;
     }
 
     @Override

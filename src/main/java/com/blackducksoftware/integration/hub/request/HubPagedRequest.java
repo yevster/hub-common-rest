@@ -1,5 +1,5 @@
 /**
- * Hub Rest Common
+ * Hub Common Rest
  *
  * Copyright (C) 2017 Black Duck Software, Inc.
  * http://www.blackducksoftware.com/
@@ -35,9 +35,9 @@ import com.blackducksoftware.integration.hub.rest.RestConnection;
  * are the endpoints that have the limit and offset query parameters.
  */
 public class HubPagedRequest extends HubRequest {
-    private int limit = 10;
+    public int limit = 10;
 
-    private int offset = 0;
+    public int offset = 0;
 
     public HubPagedRequest(final RestConnection restConnection) {
         super(restConnection);
@@ -67,22 +67,6 @@ public class HubPagedRequest extends HubRequest {
     public HubPagedRequest addQueryParameters(final Map<String, String> queryParameters) {
         super.addQueryParameters(queryParameters);
         return this;
-    }
-
-    public int getLimit() {
-        return limit;
-    }
-
-    public void setLimit(final int limit) {
-        this.limit = limit;
-    }
-
-    public int getOffset() {
-        return offset;
-    }
-
-    public void setOffset(final int offset) {
-        this.offset = offset;
     }
 
 }

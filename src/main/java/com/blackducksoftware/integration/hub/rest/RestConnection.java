@@ -1,5 +1,5 @@
 /**
- * Hub Rest Common
+ * Hub Common Rest
  *
  * Copyright (C) 2017 Black Duck Software, Inc.
  * http://www.blackducksoftware.com/
@@ -64,31 +64,31 @@ import okhttp3.Response;
 public abstract class RestConnection {
     public static final String JSON_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSX";
 
-    private final Gson gson = new GsonBuilder().setDateFormat(JSON_DATE_FORMAT).create();
+    public final Gson gson = new GsonBuilder().setDateFormat(JSON_DATE_FORMAT).create();
 
-    private final JsonParser jsonParser = new JsonParser();
+    public final JsonParser jsonParser = new JsonParser();
 
-    private final OkHttpClient.Builder builder = new OkHttpClient.Builder();
+    public final OkHttpClient.Builder builder = new OkHttpClient.Builder();
 
-    private final Map<String, String> requestHeaders = new HashMap<>();
+    public final Map<String, String> commonRequestHeaders = new HashMap<>();
 
-    private final URL hubBaseUrl;
+    public final URL hubBaseUrl;
 
-    private int timeout = 120;
+    public int timeout = 120;
 
-    private String proxyHost;
+    public String proxyHost;
 
-    private int proxyPort;
+    public int proxyPort;
 
-    private String proxyNoHosts;
+    public String proxyNoHosts;
 
-    private String proxyUsername;
+    public String proxyUsername;
 
-    private String proxyPassword;
+    public String proxyPassword;
 
     private OkHttpClient client;
 
-    private IntLogger logger;
+    public final IntLogger logger;
 
     public static Date parseDateString(final String dateString) throws ParseException {
         final SimpleDateFormat sdf = new SimpleDateFormat(JSON_DATE_FORMAT);
@@ -105,14 +105,14 @@ public abstract class RestConnection {
     public RestConnection(final IntLogger logger, final URL hubBaseUrl, final int timeout) {
         this.logger = logger;
         this.hubBaseUrl = hubBaseUrl;
-        setTimeout(timeout);
+        this.timeout = timeout;
     }
 
     public void connect() throws IntegrationException {
         addBuilderConnectionTimes();
         addBuilderProxyInformation();
         addBuilderAuthentication();
-        setClient(getBuilder().build());
+        setClient(builder.build());
         clientAuthenticate();
     }
 
@@ -121,7 +121,7 @@ public abstract class RestConnection {
     public abstract void clientAuthenticate() throws IntegrationException;
 
     public HttpUrl createHttpUrl() {
-        return HttpUrl.get(getHubBaseUrl()).newBuilder().build();
+        return HttpUrl.get(hubBaseUrl).newBuilder().build();
     }
 
     public HttpUrl createHttpUrl(final URL providedUrl) {
@@ -140,7 +140,7 @@ public abstract class RestConnection {
 
     public HttpUrl createHttpUrl(final List<String> urlSegments,
             final Map<String, String> queryParameters) {
-        return createHttpUrl(getHubBaseUrl().toString(), urlSegments, queryParameters);
+        return createHttpUrl(hubBaseUrl.toString(), urlSegments, queryParameters);
     }
 
     public HttpUrl createHttpUrl(final String providedUrl, final List<String> urlSegments,
@@ -166,24 +166,24 @@ public abstract class RestConnection {
     }
 
     private void addBuilderProxyInformation() throws IntegrationRestException {
-        if (shouldUseProxyForUrl(getHubBaseUrl())) {
-            builder.proxy(getProxy(getHubBaseUrl()));
+        if (shouldUseProxyForUrl(hubBaseUrl)) {
+            builder.proxy(getProxy(hubBaseUrl));
             builder.proxyAuthenticator(
-                    new com.blackducksoftware.integration.hub.proxy.OkAuthenticator(getProxyUsername(),
-                            getProxyPassword()));
+                    new com.blackducksoftware.integration.hub.proxy.OkAuthenticator(proxyUsername,
+                            proxyPassword));
         }
     }
 
     private Proxy getProxy(final URL hubUrl) {
-        final Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(getProxyHost(), getProxyPort()));
+        final Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
         return proxy;
     }
 
     private boolean shouldUseProxyForUrl(final URL url) {
-        if (StringUtils.isBlank(getProxyHost()) || getProxyPort() <= 0) {
+        if (StringUtils.isBlank(proxyHost) || proxyPort <= 0) {
             return false;
         }
-        final List<Pattern> ignoredProxyHostPatterns = ProxyUtil.getIgnoredProxyHostPatterns(getProxyNoHosts());
+        final List<Pattern> ignoredProxyHostPatterns = ProxyUtil.getIgnoredProxyHostPatterns(proxyNoHosts);
         return !ProxyUtil.shouldIgnoreHost(url.getHost(), ignoredProxyHostPatterns);
     }
 
@@ -241,8 +241,8 @@ public abstract class RestConnection {
 
     private Request.Builder getRequestBuilder(final Map<String, String> headers) {
         final Request.Builder builder = new Request.Builder();
-        final Map<String, String> requestHeaders = getCommonRequestHeaders();
-        requestHeaders.putAll(getCommonRequestHeaders());
+        final Map<String, String> requestHeaders = commonRequestHeaders;
+        requestHeaders.putAll(commonRequestHeaders);
         if (headers != null) {
             requestHeaders.putAll(headers);
         }
@@ -257,10 +257,10 @@ public abstract class RestConnection {
     }
 
     private Response handleExecuteClientCall(final Request request, final int retryCount) throws IntegrationException {
-        if (getClient() != null) {
+        if (client != null) {
             try {
                 logRequestHeaders(request);
-                final Response response = getClient().newCall(request).execute();
+                final Response response = client.newCall(request).execute();
                 if (!response.isSuccessful()) {
                     if (response.code() == 401 && retryCount < 2) {
                         connect();
@@ -336,15 +336,7 @@ public abstract class RestConnection {
 
     @Override
     public String toString() {
-        return "RestConnection [baseUrl=" + getHubBaseUrl() + "]";
-    }
-
-    public Map<String, String> getCommonRequestHeaders() {
-        return requestHeaders;
-    }
-
-    protected OkHttpClient.Builder getBuilder() {
-        return builder;
+        return "RestConnection [baseUrl=" + hubBaseUrl + "]";
     }
 
     public OkHttpClient getClient() {
@@ -353,78 +345,6 @@ public abstract class RestConnection {
 
     public void setClient(final OkHttpClient client) {
         this.client = client;
-    }
-
-    public URL getHubBaseUrl() {
-        return hubBaseUrl;
-    }
-
-    public Gson getGson() {
-        return gson;
-    }
-
-    public JsonParser getJsonParser() {
-        return jsonParser;
-    }
-
-    public IntLogger getLogger() {
-        return logger;
-    }
-
-    public void setLogger(final IntLogger logger) {
-        this.logger = logger;
-    }
-
-    public int getTimeout() {
-        return timeout;
-    }
-
-    public void setTimeout(final int timeout) {
-        if (timeout <= 0) {
-            throw new IllegalArgumentException("Timeout must be greater than zero.");
-        }
-        this.timeout = timeout;
-        logMessage(LogLevel.DEBUG, "Setting connectTimeout to: " + timeout + "s on client context");
-    }
-
-    public String getProxyHost() {
-        return proxyHost;
-    }
-
-    public void setProxyHost(final String proxyHost) {
-        this.proxyHost = proxyHost;
-    }
-
-    public int getProxyPort() {
-        return proxyPort;
-    }
-
-    public void setProxyPort(final int proxyPort) {
-        this.proxyPort = proxyPort;
-    }
-
-    public String getProxyNoHosts() {
-        return proxyNoHosts;
-    }
-
-    public void setProxyNoHosts(final String proxyNoHosts) {
-        this.proxyNoHosts = proxyNoHosts;
-    }
-
-    public String getProxyUsername() {
-        return proxyUsername;
-    }
-
-    public void setProxyUsername(final String proxyUsername) {
-        this.proxyUsername = proxyUsername;
-    }
-
-    public String getProxyPassword() {
-        return proxyPassword;
-    }
-
-    public void setProxyPassword(final String proxyPassword) {
-        this.proxyPassword = proxyPassword;
     }
 
 }

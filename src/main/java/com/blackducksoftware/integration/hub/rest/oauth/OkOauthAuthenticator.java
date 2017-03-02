@@ -1,5 +1,5 @@
 /**
- * Hub Rest Common
+ * Hub Common Rest
  *
  * Copyright (C) 2017 Black Duck Software, Inc.
  * http://www.blackducksoftware.com/
@@ -57,7 +57,7 @@ public class OkOauthAuthenticator implements Authenticator {
             } catch (final IntegrationException e) {
                 throw new IOException("Cannot refresh token", e);
             }
-            restConnection.getCommonRequestHeaders().put(TokenManager.WWW_AUTH_RESP, credential);
+            restConnection.commonRequestHeaders.put(TokenManager.WWW_AUTH_RESP, credential);
             return response.request().newBuilder().header(TokenManager.WWW_AUTH_RESP, credential).build();
         }
     }

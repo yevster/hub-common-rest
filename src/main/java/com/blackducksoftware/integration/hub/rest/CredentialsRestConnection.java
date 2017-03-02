@@ -1,5 +1,5 @@
 /**
- * Hub Rest Common
+ * Hub Common Rest
  *
  * Copyright (C) 2017 Black Duck Software, Inc.
  * http://www.blackducksoftware.com/
@@ -58,7 +58,7 @@ public class CredentialsRestConnection extends RestConnection {
         if (StringUtils.isNotBlank(hubUsername) && StringUtils.isNotBlank(hubPassword)) {
             final CookieManager cookieManager = new CookieManager();
             cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
-            getBuilder().cookieJar(new JavaNetCookieJar(cookieManager));
+            builder.cookieJar(new JavaNetCookieJar(cookieManager));
         }
     }
 
