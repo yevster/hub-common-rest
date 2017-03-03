@@ -154,6 +154,7 @@ class RestConnectionTest {
         assert httpUrl == request.url
         assert "application/json".equals(request.header("Accept"))
         assert "Header".equals(request.header("Common"))
+        assert !restConnection.commonRequestHeaders.isEmpty()
 
         String mediaType = "text/plain"
         request = restConnection.createGetRequest(httpUrl, mediaType)
@@ -161,6 +162,7 @@ class RestConnectionTest {
         assert httpUrl == request.url
         assert mediaType.equals(request.header("Accept"))
         assert "Header".equals(request.header("Common"))
+        assert !restConnection.commonRequestHeaders.isEmpty()
 
         restConnection.commonRequestHeaders.remove("Common")
         request = restConnection.createGetRequest(httpUrl, [name:'hello', question:'who'])
@@ -169,6 +171,7 @@ class RestConnectionTest {
         assert "hello".equals(request.header("name"))
         assert "who".equals(request.header("question"))
         assert null == request.header("Common")
+        assert restConnection.commonRequestHeaders.isEmpty()
     }
 
     @Test
