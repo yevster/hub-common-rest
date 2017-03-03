@@ -261,7 +261,6 @@ public abstract class RestConnection {
             try {
                 logRequestHeaders(request);
                 final Response response = client.newCall(request).execute();
-                logResponseHeaders(response);
                 if (!response.isSuccessful()) {
                     if (response.code() == 401 && retryCount < 2) {
                         connect();
@@ -272,6 +271,7 @@ public abstract class RestConnection {
                                         request.method(), request.url().uri().toString(), response.code(), response.message()));
                     }
                 }
+                logResponseHeaders(response);
                 return response;
             } catch (final IOException e) {
                 throw new IntegrationException(e.getMessage(), e);
