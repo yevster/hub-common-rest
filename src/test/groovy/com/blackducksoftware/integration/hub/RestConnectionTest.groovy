@@ -61,6 +61,10 @@ class RestConnectionTest {
         server.shutdown();
     }
 
+    private RestConnection getRestConnection(){
+        getRestConnection(new MockResponse().setResponseCode(200))
+    }
+
     private RestConnection getRestConnection(MockResponse response){
         final Dispatcher dispatcher = new Dispatcher() {
                     @Override
@@ -266,19 +270,14 @@ class RestConnectionTest {
         new Response(builder)
     }
 
-    private OkHttpClient getClient(Response mockResponse){
-        def call = [execute: { -> mockResponse }, ] as okhttp3.Call
-        [newCall: { Request request -> call }] as okhttp3.OkHttpClient
-    }
-
     @Test
     public void testHandleExecuteClientCallFail(){
         RestConnection restConnection = getRestConnection()
         HttpUrl httpUrl = restConnection.createHttpUrl()
         Request request = restConnection.createGetRequest(httpUrl)
         restConnection.connect()
-        restConnection.client = getClient(getFailureResponse())
 
+        restConnection = getRestConnection(new MockResponse().setResponseCode(404))
         try{
             restConnection.handleExecuteClientCall(request)
             fail('Should have thrown exception')
