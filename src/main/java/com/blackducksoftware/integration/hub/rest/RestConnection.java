@@ -86,9 +86,9 @@ public abstract class RestConnection {
 
     public String proxyPassword;
 
-    private OkHttpClient client;
-
     public IntLogger logger;
+
+    private OkHttpClient client;
 
     public static Date parseDateString(final String dateString) throws ParseException {
         final SimpleDateFormat sdf = new SimpleDateFormat(JSON_DATE_FORMAT);

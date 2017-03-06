@@ -24,6 +24,7 @@
 package com.blackducksoftware.integration.hub.proxy;
 
 import java.io.IOException;
+import java.net.Proxy;
 import java.util.List;
 
 import okhttp3.Authenticator;
@@ -58,11 +59,11 @@ public class OkAuthenticator implements Authenticator {
 
     @Override
     public Request authenticate(final Route route, final Response response) throws IOException {
-        if (route.proxy() != null) {
-            setProxy(true);
+        if (route.proxy() != null && route.proxy() != Proxy.NO_PROXY) {
+            this.proxy = true;
         }
         checkAuthScheme(response);
-        if (isBasicAuth()) {
+        if (basicAuth) {
             if (response.priorResponse() != null) {
                 // Should not attempt authentication again if the response has a previous response
                 // because that means we have already tried to authenticate
@@ -77,36 +78,20 @@ public class OkAuthenticator implements Authenticator {
         final List<Challenge> challenges = response.challenges();
         for (final Challenge challenge : challenges) {
             if ("Basic".equalsIgnoreCase(challenge.scheme())) {
-                setBasicAuth(true);
+                this.basicAuth = true;
             }
         }
     }
 
-    public synchronized Request authenticateBasic(final Response response) throws IOException {
+    private Request authenticateBasic(final Response response) throws IOException {
         String headerKey;
-        if (isProxy()) {
+        if (proxy) {
             headerKey = PROXY_AUTH_RESP;
         } else {
             headerKey = WWW_AUTH_RESP;
         }
         final String credential = Credentials.basic(username, password);
         return response.request().newBuilder().header(headerKey, credential).build();
-    }
-
-    public boolean isProxy() {
-        return proxy;
-    }
-
-    public void setProxy(final boolean proxy) {
-        this.proxy = proxy;
-    }
-
-    public boolean isBasicAuth() {
-        return basicAuth;
-    }
-
-    public void setBasicAuth(final boolean basicAuth) {
-        this.basicAuth = basicAuth;
     }
 
 }
