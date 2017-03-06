@@ -21,15 +21,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.blackducksoftware.integration.hub;
+package com.blackducksoftware.integration.hub
 
-import org.junit.Test;
+import org.junit.Test
 
-public class NothingTest {
+class RestConstantsTest {
 
     @Test
-    public void emptyTest() {
-
+    public void coverage(){
+        RestConstants constants = new RestConstants()
     }
-
 }

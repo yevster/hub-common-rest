@@ -25,10 +25,6 @@ package com.blackducksoftware.integration.hub;
 
 public class RestConstants {
 
-    private RestConstants() {
-
-    }
-
     // query parameters
     public static final String QUERY_OFFSET = "offset";
 
