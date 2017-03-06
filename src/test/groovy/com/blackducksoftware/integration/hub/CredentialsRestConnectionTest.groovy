@@ -62,6 +62,13 @@ class CredentialsRestConnectionTest {
         new Response(builder)
     }
 
+    private Response getUnauthorizedResponse(){
+        Response.Builder builder = new Response.Builder()
+        builder.code(401)
+        builder.body(ResponseBody.create(MediaType.parse("text/plain"), "Hello"))
+        new Response(builder)
+    }
+
     private Response getFailureResponse(){
         Response.Builder builder = new Response.Builder()
         builder.code(404)
@@ -80,6 +87,19 @@ class CredentialsRestConnectionTest {
         HttpUrl httpUrl = restConnection.createHttpUrl()
         Request request = restConnection.createGetRequest(httpUrl)
         restConnection.handleExecuteClientCall(request).withCloseable{ assert 200 == it.code }
+    }
+
+    @Test
+    public void testHandleExecuteClientCallUnauthorized(){
+        RestConnection restConnection = getRestConnection(getClient(getUnauthorizedResponse()))
+        HttpUrl httpUrl = restConnection.createHttpUrl()
+        Request request = restConnection.createGetRequest(httpUrl)
+        try{
+            restConnection.handleExecuteClientCall(request)
+            fail('Should have thrown exception')
+        } catch (IntegrationRestException e) {
+            assert 401 == e.httpStatusCode
+        }
     }
 
 
