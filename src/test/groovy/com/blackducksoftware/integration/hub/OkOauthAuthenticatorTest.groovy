@@ -29,6 +29,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
+import com.blackducksoftware.integration.hub.api.oauth.OAuthConfiguration
 import com.blackducksoftware.integration.hub.rest.RestConnection
 import com.blackducksoftware.integration.hub.rest.UnauthenticatedRestConnection
 import com.blackducksoftware.integration.hub.rest.oauth.AccessType
@@ -63,27 +64,58 @@ class OkOauthAuthenticatorTest {
         server.shutdown();
     }
 
-    private RestConnection getRestConnection(){
-        getRestConnection(new MockResponse().setResponseCode(200))
+    private String getClientTokenJson(){
+        getJsonFileContent('ClientToken.json')
     }
 
-    private RestConnection getRestConnection(MockResponse response){
-        if(null != response){
-            final Dispatcher dispatcher = new Dispatcher() {
-                        @Override
-                        public MockResponse dispatch(RecordedRequest request) throws InterruptedException {
-                            response
+    private String getUserTokenJson(){
+        getJsonFileContent('UserToken.json')
+    }
+
+    private String getJsonFileContent(String fileName){
+        getClass().getResource("/$fileName").text
+    }
+
+    private RestConnection getRestConnection(){
+        getRestConnection(null)
+    }
+
+    private RestConnection getRestConnection(MockResponse mockResponse){
+        final Dispatcher dispatcher = new Dispatcher() {
+                    @Override
+                    public MockResponse dispatch(RecordedRequest request) throws InterruptedException {
+                        MockResponse response = null
+                        if(null != mockResponse){
+                            response = mockResponse
+                        } else{
+                            String body = request.getBody().readUtf8()
+                            if(body.contains("grant_type=authorization_code")){
+                                response = new MockResponse().setResponseCode(200).setBody(getUserTokenJson())
+                            } else  if(body.contains("grant_type=client_credentials")){
+                                response = new MockResponse().setResponseCode(200).setBody(getClientTokenJson())
+                            } else  if(body.contains("grant_type=refresh_token")){
+                                response = new MockResponse().setResponseCode(200).setBody(getUserTokenJson())
+                            } else {
+                                response = new MockResponse().setResponseCode(200)
+                            }
                         }
-                    };
-            server.setDispatcher(dispatcher);
-        }
+                        response
+                    }
+                };
+        server.setDispatcher(dispatcher);
         new UnauthenticatedRestConnection(new PrintStreamIntLogger(System.out, LogLevel.INFO), server.url("/").url(), CONNECTION_TIMEOUT)
     }
 
     private TokenManager getTokenManager(){
+        OAuthConfiguration oAuthConfig = new OAuthConfiguration()
+        oAuthConfig.clientId = 'ClientId'
+        oAuthConfig.authorizeUri = server.url("/authorize/").toString()
+        oAuthConfig.tokenUri = server.url("/token/").toString()
+        oAuthConfig.callbackUrl = server.url("/callback/").toString()
 
-
-        new TokenManager(new PrintStreamIntLogger(System.out, LogLevel.INFO), CONNECTION_TIMEOUT)
+        TokenManager tokenManager = new TokenManager(new PrintStreamIntLogger(System.out, LogLevel.INFO), CONNECTION_TIMEOUT)
+        tokenManager.setConfiguration(oAuthConfig)
+        tokenManager
     }
 
     private Route mockRoute() {
@@ -138,39 +170,5 @@ class OkOauthAuthenticatorTest {
         response.code(401)
         Request request = authenticator.authenticate(route, response.build())
         assert null != request
-    }
-
-    @Test
-    public void testAuthenticateResponseSuccess(){
-        TokenManager tokenManager = getTokenManager()
-        AccessType accessType = AccessType.CLIENT
-        RestConnection restConnection = getRestConnection()
-        OkOauthAuthenticator authenticator = new OkOauthAuthenticator(tokenManager,accessType, restConnection)
-        def route = mockRoute()
-        Response.Builder response = new Response.Builder()
-        Request.Builder initialRequest = new Request.Builder()
-        initialRequest.url(server.url("/").toString())
-        response.request(initialRequest.build())
-        response.protocol(Protocol.HTTP_1_1)
-        response.code(200)
-        Request request = authenticator.authenticate(route, response.build())
-        assert null == request
-    }
-
-    @Test
-    public void testAuthenticateResponseNoChallenge(){
-        TokenManager tokenManager = getTokenManager()
-        AccessType accessType = AccessType.CLIENT
-        RestConnection restConnection = getRestConnection()
-        OkOauthAuthenticator authenticator = new OkOauthAuthenticator(tokenManager,accessType, restConnection)
-        def route = mockRoute()
-        Response.Builder response = new Response.Builder()
-        Request.Builder initialRequest = new Request.Builder()
-        initialRequest.url(server.url("/").toString())
-        response.request(initialRequest.build())
-        response.protocol(Protocol.HTTP_1_1)
-        response.code(407)
-        Request request = authenticator.authenticate(route, response.build())
-        assert null == request
     }
 }
