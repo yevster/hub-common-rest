@@ -116,6 +116,9 @@ class TokenManagerTest {
     @Test
     public void testCreateTokenCredential(){
         TokenManager tokenManager = getTokenManager()
+        assert null != tokenManager.getLogger()
+        assert null != tokenManager.getTimeout()
+        assert null != tokenManager.getConfiguration()
         String token = 'test'
         String output = tokenManager.createTokenCredential(token)
         assert null != output
@@ -193,6 +196,15 @@ class TokenManagerTest {
             fail('Should have thrown exception')
         } catch (IntegrationException e){
             assert 'Error refreshing client token'.equals(e.getMessage())
+            IntegrationRestException restException = e.getCause()
+            assert 404 == restException.httpStatusCode
+        }
+        tokenManager = getTokenManager(new MockResponse().setResponseCode(404), refreshToken)
+        try{
+            tokenManager.refreshToken(AccessType.USER)
+            fail('Should have thrown exception')
+        } catch (IntegrationException e){
+            assert 'Error refreshing user token'.equals(e.getMessage())
             IntegrationRestException restException = e.getCause()
             assert 404 == restException.httpStatusCode
         }
