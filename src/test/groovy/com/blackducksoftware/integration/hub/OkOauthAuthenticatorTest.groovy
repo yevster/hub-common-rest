@@ -80,7 +80,7 @@ class OkOauthAuthenticatorTest {
         getRestConnection(null)
     }
 
-    private RestConnection getRestConnection(MockResponse mockResponse){
+    private RestConnection getRestConnection(final MockResponse mockResponse){
         final Dispatcher dispatcher = new Dispatcher() {
                     @Override
                     public MockResponse dispatch(RecordedRequest request) throws InterruptedException {
@@ -170,5 +170,28 @@ class OkOauthAuthenticatorTest {
         response.code(401)
         Request request = authenticator.authenticate(route, response.build())
         assert null != request
+    }
+
+    @Test
+    public void testAuthenticateFail(){
+        TokenManager tokenManager = getTokenManager()
+        AccessType accessType = AccessType.CLIENT
+        RestConnection restConnection = getRestConnection(new MockResponse().setResponseCode(404))
+        OkOauthAuthenticator authenticator = new OkOauthAuthenticator(tokenManager,accessType, restConnection)
+        def route = mockRoute()
+        try{
+            Response.Builder response = new Response.Builder()
+            Request.Builder initialRequest = new Request.Builder()
+            initialRequest.url(server.url("/").toString())
+            response.request(initialRequest.build())
+            response.protocol(Protocol.HTTP_1_1)
+            response.code(401)
+
+            authenticator.authenticate(route, response.build())
+            fail('Should have thrown exception')
+        } catch (Exception e){
+            assert null != e
+            assert 'Cannot refresh token'.equals(e.getMessage())
+        }
     }
 }
