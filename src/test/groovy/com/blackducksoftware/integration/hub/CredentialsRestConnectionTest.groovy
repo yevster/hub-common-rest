@@ -23,6 +23,8 @@
  */
 package com.blackducksoftware.integration.hub
 
+import org.junit.After
+import org.junit.Before
 import org.junit.Test
 
 import com.blackducksoftware.integration.hub.rest.CredentialsRestConnection
@@ -32,66 +34,66 @@ import com.blackducksoftware.integration.log.LogLevel
 import com.blackducksoftware.integration.log.PrintStreamIntLogger
 
 import okhttp3.HttpUrl
-import okhttp3.MediaType
-import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.Response
-import okhttp3.ResponseBody
+import okhttp3.mockwebserver.Dispatcher
+import okhttp3.mockwebserver.MockResponse
+import okhttp3.mockwebserver.MockWebServer
+import okhttp3.mockwebserver.RecordedRequest
 
 class CredentialsRestConnectionTest {
-    public static final String GOOGLE_URL_STRING = "https://www.google.com/"
-
-    public static final URL GOOGLE_URL = new URL(GOOGLE_URL_STRING)
-
     public static final int CONNECTION_TIMEOUT = 213
 
-    private RestConnection getRestConnection(OkHttpClient mockClient){
-        new CredentialsRestConnection(new PrintStreamIntLogger(System.out, LogLevel.INFO), GOOGLE_URL, 'TestUser', 'Password', CONNECTION_TIMEOUT){
+    private final MockWebServer server = new MockWebServer();
+
+    @Before public void setUp() throws Exception {
+        server.start();
+    }
+
+    @After public void tearDown() throws Exception {
+        server.shutdown();
+    }
+
+    private RestConnection getRestConnection(MockResponse response){
+        final Dispatcher dispatcher = new Dispatcher() {
                     @Override
-                    public void setClient(final OkHttpClient client) {
-                        super.setClient(mockClient)
+                    public MockResponse dispatch(RecordedRequest request) throws InterruptedException {
+                        response
                     }
-                }
+                };
+        server.setDispatcher(dispatcher);
+        new CredentialsRestConnection(new PrintStreamIntLogger(System.out, LogLevel.INFO), server.url("/").url(), 'TestUser', 'Password', CONNECTION_TIMEOUT)
     }
 
-
-    private Response getSuccessResponse(){
-        Response.Builder builder = new Response.Builder()
-        builder.code(200)
-        builder.body(ResponseBody.create(MediaType.parse("text/plain"), "Hello"))
-        new Response(builder)
+    private MockResponse getSuccessResponse(){
+        new MockResponse()
+                .addHeader("Content-Type", "text/plain")
+                .setBody("Hello").setResponseCode(200);
     }
 
-    private Response getUnauthorizedResponse(){
-        Response.Builder builder = new Response.Builder()
-        builder.code(401)
-        builder.body(ResponseBody.create(MediaType.parse("text/plain"), "Hello"))
-        new Response(builder)
+    private MockResponse getUnauthorizedResponse(){
+        new MockResponse()
+                .addHeader("Content-Type", "text/plain")
+                .setBody("Hello").setResponseCode(401);
     }
 
-    private Response getFailureResponse(){
-        Response.Builder builder = new Response.Builder()
-        builder.code(404)
-        builder.body(ResponseBody.create(MediaType.parse("text/plain"), "Hello"))
-        new Response(builder)
-    }
-
-    private OkHttpClient getClient(Response mockResponse){
-        def call = [execute: { -> mockResponse }, ] as okhttp3.Call
-        [newCall: { Request request -> call }] as okhttp3.OkHttpClient
+    private MockResponse getFailureResponse(){
+        new MockResponse()
+                .addHeader("Content-Type", "text/plain")
+                .setBody("Hello").setResponseCode(404);
     }
 
     @Test
     public void testHandleExecuteClientCallSuccessful(){
-        RestConnection restConnection = getRestConnection(getClient(getSuccessResponse()))
+        RestConnection restConnection = getRestConnection(getSuccessResponse())
         HttpUrl httpUrl = restConnection.createHttpUrl()
         Request request = restConnection.createGetRequest(httpUrl)
         restConnection.handleExecuteClientCall(request).withCloseable{ assert 200 == it.code }
+        assert null != restConnection.client.cookieJar
     }
 
     @Test
     public void testHandleExecuteClientCallUnauthorized(){
-        RestConnection restConnection = getRestConnection(getClient(getUnauthorizedResponse()))
+        RestConnection restConnection = getRestConnection(getUnauthorizedResponse())
         HttpUrl httpUrl = restConnection.createHttpUrl()
         Request request = restConnection.createGetRequest(httpUrl)
         try{
@@ -105,7 +107,7 @@ class CredentialsRestConnectionTest {
 
     @Test
     public void testHandleExecuteClientCallFail(){
-        RestConnection restConnection = getRestConnection(getClient(getFailureResponse()))
+        RestConnection restConnection = getRestConnection(getFailureResponse())
         HttpUrl httpUrl = restConnection.createHttpUrl()
         Request request = restConnection.createGetRequest(httpUrl)
         try{
@@ -114,14 +116,5 @@ class CredentialsRestConnectionTest {
         } catch (IntegrationRestException e) {
             assert 404 == e.httpStatusCode
         }
-    }
-
-    @Test
-    public void testClientForCookieJar(){
-        RestConnection restConnection = new CredentialsRestConnection(new PrintStreamIntLogger(System.out, LogLevel.INFO), GOOGLE_URL, null, null, 213)
-        HttpUrl httpUrl = restConnection.createHttpUrl()
-        Request request = restConnection.createGetRequest(httpUrl)
-        restConnection.handleExecuteClientCall(request)
-        assert null != restConnection.client.cookieJar
     }
 }

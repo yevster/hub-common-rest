@@ -23,8 +23,11 @@
  */
 package com.blackducksoftware.integration.hub
 
+import org.junit.After
+import org.junit.Before
 import org.junit.Test
 
+import com.blackducksoftware.integration.hub.rest.CredentialsRestConnection
 import com.blackducksoftware.integration.hub.rest.RestConnection
 import com.blackducksoftware.integration.hub.rest.UnauthenticatedRestConnection
 import com.blackducksoftware.integration.hub.rest.exception.IntegrationRestException
@@ -40,16 +43,33 @@ import okhttp3.Request
 import okhttp3.RequestBody
 import okhttp3.Response
 import okhttp3.ResponseBody
+import okhttp3.mockwebserver.Dispatcher
+import okhttp3.mockwebserver.MockResponse
+import okhttp3.mockwebserver.MockWebServer
+import okhttp3.mockwebserver.RecordedRequest
 
 class RestConnectionTest {
-    public static final String GOOGLE_URL_STRING = "https://www.google.com/"
-
-    public static final URL GOOGLE_URL = new URL(GOOGLE_URL_STRING)
-
     public static final int CONNECTION_TIMEOUT = 213
 
-    private RestConnection getRestConnection(){
-        new UnauthenticatedRestConnection(new PrintStreamIntLogger(System.out, LogLevel.TRACE), GOOGLE_URL, CONNECTION_TIMEOUT)
+    private final MockWebServer server = new MockWebServer();
+
+    @Before public void setUp() throws Exception {
+        server.start();
+    }
+
+    @After public void tearDown() throws Exception {
+        server.shutdown();
+    }
+
+    private RestConnection getRestConnection(MockResponse response){
+        final Dispatcher dispatcher = new Dispatcher() {
+                    @Override
+                    public MockResponse dispatch(RecordedRequest request) throws InterruptedException {
+                        response
+                    }
+                };
+        server.setDispatcher(dispatcher);
+        new CredentialsRestConnection(new PrintStreamIntLogger(System.out, LogLevel.INFO), server.url("/").url(), 'TestUser', 'Password', CONNECTION_TIMEOUT)
     }
 
     @Test
@@ -57,7 +77,7 @@ class RestConnectionTest {
         IntLogger logger = new PrintStreamIntLogger(System.out, LogLevel.INFO)
         int timeoutSeconds = 213
         int timeoutMilliSeconds = timeoutSeconds * 1000
-        RestConnection restConnection = new UnauthenticatedRestConnection(logger, GOOGLE_URL, timeoutSeconds)
+        RestConnection restConnection = new UnauthenticatedRestConnection(logger, server.url("/").url(), timeoutSeconds)
         OkHttpClient realClient = restConnection.client
         assert null == realClient
         restConnection.connect()
@@ -68,7 +88,7 @@ class RestConnectionTest {
         assert null == realClient.proxy
         assert okhttp3.Authenticator.NONE == realClient.proxyAuthenticator
 
-        restConnection = new UnauthenticatedRestConnection(logger, GOOGLE_URL, timeoutSeconds)
+        restConnection = new UnauthenticatedRestConnection(logger, server.url("/").url(), timeoutSeconds)
         String proxyHost = "ProxyHost"
         int proxyPort = 3128
         String proxyIgnoredHosts = "IgnoredHost"
@@ -86,7 +106,7 @@ class RestConnectionTest {
         assert null != realClient.proxy
         assert okhttp3.Authenticator.NONE != realClient.proxyAuthenticator
 
-        restConnection = new UnauthenticatedRestConnection(logger, GOOGLE_URL, timeoutSeconds)
+        restConnection = new UnauthenticatedRestConnection(logger, server.url("/").url(), timeoutSeconds)
         proxyIgnoredHosts = ".*"
         restConnection.proxyHost = proxyHost
         restConnection.proxyPort = proxyPort
@@ -103,19 +123,19 @@ class RestConnectionTest {
     @Test
     public void testToString(){
         RestConnection restConnection = getRestConnection()
-        String s  = "RestConnection [baseUrl=$GOOGLE_URL_STRING]"
+        String s  = "RestConnection [baseUrl=${server.url("/").toString()}]"
         assert s.equals(restConnection.toString())
     }
 
     @Test
     public void testCreatingHttpUrl(){
         RestConnection restConnection = getRestConnection()
-        assert GOOGLE_URL_STRING == restConnection.createHttpUrl().url
-        assert GOOGLE_URL_STRING == restConnection.createHttpUrl(GOOGLE_URL).url
-        assert GOOGLE_URL_STRING == restConnection.createHttpUrl(GOOGLE_URL_STRING).url
-        assert GOOGLE_URL_STRING+'test/whatsUp' == restConnection.createHttpUrl(["test", "whatsUp"]).url
-        assert GOOGLE_URL_STRING+'test/whatsUp?name=hello&question=who' == restConnection.createHttpUrl(["test", "whatsUp"], [name:'hello', question:'who']).url
-        assert GOOGLE_URL_STRING+'test/whatsUp?name=hello&question=who' == restConnection.createHttpUrl(GOOGLE_URL_STRING,["test", "whatsUp"], [name:'hello', question:'who']).url
+        assert server.url("/").toString() == restConnection.createHttpUrl().url
+        assert server.url("/").toString() == restConnection.createHttpUrl(server.url("/").url()).url
+        assert server.url("/").toString() == restConnection.createHttpUrl(server.url("/").toString()).url
+        assert server.url("/").toString()+'test/whatsUp' == restConnection.createHttpUrl(["test", "whatsUp"]).url
+        assert server.url("/").toString()+'test/whatsUp?name=hello&question=who' == restConnection.createHttpUrl(["test", "whatsUp"], [name:'hello', question:'who']).url
+        assert server.url("/").toString()+'test/whatsUp?name=hello&question=who' == restConnection.createHttpUrl(server.url("/").toString(),["test", "whatsUp"], [name:'hello', question:'who']).url
     }
 
     @Test

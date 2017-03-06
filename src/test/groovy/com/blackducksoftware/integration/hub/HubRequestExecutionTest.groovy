@@ -23,6 +23,8 @@
  */
 package com.blackducksoftware.integration.hub
 
+import org.junit.After
+import org.junit.Before
 import org.junit.Test
 
 import com.blackducksoftware.integration.hub.request.HubPagedRequest
@@ -34,15 +36,39 @@ import com.blackducksoftware.integration.hub.rest.exception.IntegrationRestExcep
 import com.blackducksoftware.integration.log.LogLevel
 import com.blackducksoftware.integration.log.PrintStreamIntLogger
 
+import okhttp3.mockwebserver.Dispatcher
+import okhttp3.mockwebserver.MockResponse
+import okhttp3.mockwebserver.MockWebServer
+import okhttp3.mockwebserver.RecordedRequest
+
 class HubRequestExecutionTest {
-    public static final String GOOGLE_URL_STRING = "https://www.google.com/"
-
-    public static final URL GOOGLE_URL = new URL(GOOGLE_URL_STRING)
-
     public static final int CONNECTION_TIMEOUT = 213
 
+    private final MockWebServer server = new MockWebServer();
+
+    @Before public void setUp() throws Exception {
+        server.start();
+    }
+
+    @After public void tearDown() throws Exception {
+        server.shutdown();
+    }
+
     private RestConnection getRestConnection(){
-        new UnauthenticatedRestConnection(new PrintStreamIntLogger(System.out, LogLevel.INFO), GOOGLE_URL, CONNECTION_TIMEOUT)
+        getRestConnection(new MockResponse().setResponseCode(200))
+    }
+
+    private RestConnection getRestConnection(MockResponse response){
+        if(null != response){
+            final Dispatcher dispatcher = new Dispatcher() {
+                        @Override
+                        public MockResponse dispatch(RecordedRequest request) throws InterruptedException {
+                            response
+                        }
+                    };
+            server.setDispatcher(dispatcher);
+        }
+        new UnauthenticatedRestConnection(new PrintStreamIntLogger(System.out, LogLevel.INFO), server.url("/").url(), CONNECTION_TIMEOUT)
     }
 
     @Test
@@ -63,10 +89,10 @@ class HubRequestExecutionTest {
     @Test
     public void testExecutePagedGet(){
         HubRequestFactory hubRequestFactory = new HubRequestFactory(getRestConnection())
-        HubPagedRequest request = hubRequestFactory.createPagedRequest(GOOGLE_URL_STRING)
+        HubPagedRequest request = hubRequestFactory.createPagedRequest(server.url("/").toString())
         request.executeGet().withCloseable{ assert 200 == it.code }
 
-        request = hubRequestFactory.createPagedRequest(-245, GOOGLE_URL_STRING)
+        request = hubRequestFactory.createPagedRequest(-245, server.url("/").toString())
         request.executeGet().withCloseable{
             assert 200 == it.code
             assert it.request.url.url.contains('limit=10')
@@ -78,33 +104,21 @@ class HubRequestExecutionTest {
         HubRequestFactory hubRequestFactory = new HubRequestFactory(getRestConnection())
         def formBody = [name:"hello"]
         HubRequest request = hubRequestFactory.createRequest()
-        try{
-            request.executeEncodedFormPost(formBody)
-        } catch (IntegrationRestException e){
-            assert 405 == e.httpStatusCode
-        }
+        request.executeEncodedFormPost(formBody).withCloseable{ assert 200 == it.code }
     }
 
     @Test
     public void testExecutePost(){
         HubRequestFactory hubRequestFactory = new HubRequestFactory(getRestConnection())
         HubRequest request = hubRequestFactory.createRequest()
-        try{
-            request.executePost("hello")
-        } catch (IntegrationRestException e){
-            assert 405 == e.httpStatusCode
-        }
+        request.executePost("hello").withCloseable{ assert 200 == it.code }
     }
 
     @Test
     public void testExecutePostWithMediaType(){
         HubRequestFactory hubRequestFactory = new HubRequestFactory(getRestConnection())
         HubRequest request = hubRequestFactory.createRequest()
-        try{
-            request.executePost("text/plain", "hello")
-        } catch (IntegrationRestException e){
-            assert 405 == e.httpStatusCode
-        }
+        request.executePost("text/plain", "hello").withCloseable{ assert 200 == it.code }
     }
 
     @Test
@@ -112,41 +126,38 @@ class HubRequestExecutionTest {
         HubRequestFactory hubRequestFactory = new HubRequestFactory(getRestConnection())
         def formBody = [name:"hello"]
         HubRequest request = hubRequestFactory.createRequest()
-        try{
-            request.executeEncodedFormPut(formBody)
-        } catch (IntegrationRestException e){
-            assert 405 == e.httpStatusCode
-        }
+        request.executeEncodedFormPut(formBody).withCloseable{ assert 200 == it.code }
     }
 
     @Test
     public void testExecutePut(){
         HubRequestFactory hubRequestFactory = new HubRequestFactory(getRestConnection())
         HubRequest request = hubRequestFactory.createRequest()
-        try{
-            request.executePut("hello")
-        } catch (IntegrationRestException e){
-            assert 405 == e.httpStatusCode
-        }
+        request.executePut("hello").withCloseable{ assert 200 == it.code }
     }
 
     @Test
     public void testExecutePutWithMediaType(){
         HubRequestFactory hubRequestFactory = new HubRequestFactory(getRestConnection())
         HubRequest request = hubRequestFactory.createRequest()
-        try{
-            request.executePut("text/plain", "hello")
-        } catch (IntegrationRestException e){
-            assert 405 == e.httpStatusCode
-        }
+        request.executePut("text/plain", "hello").withCloseable{ assert 200 == it.code }
     }
 
     @Test
     public void testExecuteDelete(){
         HubRequestFactory hubRequestFactory = new HubRequestFactory(getRestConnection())
         HubRequest request = hubRequestFactory.createRequest()
+        request.executeDelete()
+    }
+
+    @Test
+    public void testExecuteDeleteNotAllowed(){
+        MockResponse response = new MockResponse().setResponseCode(405)
+        HubRequestFactory hubRequestFactory = new HubRequestFactory(getRestConnection(response))
+        HubRequest request = hubRequestFactory.createRequest()
         try{
             request.executeDelete()
+            fail('Should have thrown exception')
         } catch (IntegrationRestException e){
             assert 405 == e.httpStatusCode
         }

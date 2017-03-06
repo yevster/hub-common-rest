@@ -34,16 +34,17 @@ import com.blackducksoftware.integration.hub.api.oauth.Token;
 import com.blackducksoftware.integration.hub.request.HubRequest;
 import com.blackducksoftware.integration.hub.request.HubRequestFactory;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
+import com.google.gson.Gson;
 
 import okhttp3.Response;
 
 public class HubOAuthTokenService {
-    private final RestConnection restConnection;
+    private final Gson gson;
 
     private final HubRequestFactory hubRequestFactory;
 
     public HubOAuthTokenService(final RestConnection restConnection) {
-        this.restConnection = restConnection;
+        this.gson = restConnection.gson;
         this.hubRequestFactory = new HubRequestFactory(restConnection);
     }
 
@@ -103,7 +104,7 @@ public class HubOAuthTokenService {
         final HubRequest request = hubRequestFactory.createRequest();
         try (Response response = request.executeEncodedFormPost(formDataMap)) {
             final String jsonToken = response.body().string();
-            return restConnection.gson.fromJson(jsonToken, Token.class);
+            return gson.fromJson(jsonToken, Token.class);
         } catch (final IOException e) {
             throw new IntegrationException(e);
         }
