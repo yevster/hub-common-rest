@@ -68,7 +68,7 @@ class HubRequestExecutionTest {
                     };
             server.setDispatcher(dispatcher);
         }
-        new UnauthenticatedRestConnection(new PrintStreamIntLogger(System.out, LogLevel.INFO), server.url("/").url(), CONNECTION_TIMEOUT)
+        new UnauthenticatedRestConnection(new PrintStreamIntLogger(System.out, LogLevel.TRACE), server.url("/").url(), CONNECTION_TIMEOUT)
     }
 
     @Test

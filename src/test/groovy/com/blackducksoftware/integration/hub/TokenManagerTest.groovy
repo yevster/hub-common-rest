@@ -108,7 +108,7 @@ class TokenManagerTest {
         oAuthConfig.callbackUrl = server.url("/callback/").toString()
         oAuthConfig.refreshToken = refreshToken
 
-        TokenManager tokenManager = new TokenManager(new PrintStreamIntLogger(System.out, LogLevel.INFO), CONNECTION_TIMEOUT)
+        TokenManager tokenManager = new TokenManager(new PrintStreamIntLogger(System.out, LogLevel.TRACE), CONNECTION_TIMEOUT)
         tokenManager.setConfiguration(oAuthConfig)
         tokenManager
     }

@@ -37,12 +37,9 @@ import com.blackducksoftware.integration.log.PrintStreamIntLogger
 
 import okhttp3.FormBody
 import okhttp3.HttpUrl
-import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
-import okhttp3.Response
-import okhttp3.ResponseBody
 import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -73,7 +70,7 @@ class RestConnectionTest {
                     }
                 };
         server.setDispatcher(dispatcher);
-        new CredentialsRestConnection(new PrintStreamIntLogger(System.out, LogLevel.INFO), server.url("/").url(), 'TestUser', 'Password', CONNECTION_TIMEOUT)
+        new CredentialsRestConnection(new PrintStreamIntLogger(System.out, LogLevel.TRACE), server.url("/").url(), 'TestUser', 'Password', CONNECTION_TIMEOUT)
     }
 
     @Test
@@ -263,13 +260,6 @@ class RestConnectionTest {
         restConnection.handleExecuteClientCall(request).withCloseable{  assert 200 == it.code }
     }
 
-    private Response getFailureResponse(){
-        Response.Builder builder = new Response.Builder()
-        builder.code(404)
-        builder.body(ResponseBody.create(MediaType.parse("text/plain"), "Hello"))
-        new Response(builder)
-    }
-
     @Test
     public void testHandleExecuteClientCallFail(){
         RestConnection restConnection = getRestConnection()
@@ -283,6 +273,14 @@ class RestConnectionTest {
             fail('Should have thrown exception')
         } catch (IntegrationRestException e) {
             assert 404 == e.httpStatusCode
+        }
+
+        restConnection = getRestConnection(new MockResponse().setResponseCode(401))
+        try{
+            restConnection.handleExecuteClientCall(request)
+            fail('Should have thrown exception')
+        } catch (IntegrationRestException e) {
+            assert 401 == e.httpStatusCode
         }
     }
 

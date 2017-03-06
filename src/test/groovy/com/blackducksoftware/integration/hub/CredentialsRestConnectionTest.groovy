@@ -61,7 +61,7 @@ class CredentialsRestConnectionTest {
                     }
                 };
         server.setDispatcher(dispatcher);
-        new CredentialsRestConnection(new PrintStreamIntLogger(System.out, LogLevel.INFO), server.url("/").url(), 'TestUser', 'Password', CONNECTION_TIMEOUT)
+        new CredentialsRestConnection(new PrintStreamIntLogger(System.out, LogLevel.TRACE), server.url("/").url(), 'TestUser', 'Password', CONNECTION_TIMEOUT)
     }
 
     private MockResponse getSuccessResponse(){

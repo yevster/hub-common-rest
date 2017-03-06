@@ -103,7 +103,7 @@ class OkOauthAuthenticatorTest {
                     }
                 };
         server.setDispatcher(dispatcher);
-        new UnauthenticatedRestConnection(new PrintStreamIntLogger(System.out, LogLevel.INFO), server.url("/").url(), CONNECTION_TIMEOUT)
+        new UnauthenticatedRestConnection(new PrintStreamIntLogger(System.out, LogLevel.TRACE), server.url("/").url(), CONNECTION_TIMEOUT)
     }
 
     private TokenManager getTokenManager(){
@@ -113,7 +113,7 @@ class OkOauthAuthenticatorTest {
         oAuthConfig.tokenUri = server.url("/token/").toString()
         oAuthConfig.callbackUrl = server.url("/callback/").toString()
 
-        TokenManager tokenManager = new TokenManager(new PrintStreamIntLogger(System.out, LogLevel.INFO), CONNECTION_TIMEOUT)
+        TokenManager tokenManager = new TokenManager(new PrintStreamIntLogger(System.out, LogLevel.TRACE), CONNECTION_TIMEOUT)
         tokenManager.setConfiguration(oAuthConfig)
         tokenManager
     }
