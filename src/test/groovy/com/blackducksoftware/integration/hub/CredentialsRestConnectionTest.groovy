@@ -82,7 +82,6 @@ class CredentialsRestConnectionTest {
                 .setBody("Hello").setResponseCode(404);
     }
 
-
     @Test
     public void testHandleExecuteClientCallSuccessful(){
         RestConnection restConnection = getRestConnection(getSuccessResponse())
