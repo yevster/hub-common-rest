@@ -82,33 +82,6 @@ class CredentialsRestConnectionTest {
                 .setBody("Hello").setResponseCode(404);
     }
 
-    @Test
-    public void testFollowRedirect(){
-        RestConnection restConnection = getRestConnection(getSuccessResponse())
-        HttpUrl httpUrl = restConnection.createHttpUrl()
-        Request request = restConnection.createGetRequest(httpUrl)
-        restConnection.handleExecuteClientCall(request).withCloseable{ assert 200 == it.code }
-        assert !restConnection.followRedirects
-        assert !restConnection.client.followRedirects
-
-        restConnection.followRedirects = true
-        restConnection.handleExecuteClientCall(request).withCloseable{ assert 200 == it.code }
-        assert restConnection.followRedirects
-        assert !restConnection.client.followRedirects
-
-        restConnection.connect()
-        assert restConnection.followRedirects
-        assert restConnection.client.followRedirects
-
-        restConnection.followRedirects = false
-        restConnection.handleExecuteClientCall(request).withCloseable{ assert 200 == it.code }
-        assert !restConnection.followRedirects
-        assert restConnection.client.followRedirects
-
-        restConnection.connect()
-        assert !restConnection.followRedirects
-        assert !restConnection.client.followRedirects
-    }
 
     @Test
     public void testHandleExecuteClientCallSuccessful(){

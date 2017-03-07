@@ -88,8 +88,6 @@ public abstract class RestConnection {
 
     public IntLogger logger;
 
-    public boolean followRedirects;
-
     private OkHttpClient client;
 
     public static Date parseDateString(final String dateString) throws ParseException {
@@ -112,7 +110,6 @@ public abstract class RestConnection {
 
     public void connect() throws IntegrationException {
         addBuilderConnectionTimes();
-        addBuilderOptions();
         addBuilderProxyInformation();
         addBuilderAuthentication();
         setClient(builder.build());
@@ -127,10 +124,6 @@ public abstract class RestConnection {
         builder.connectTimeout(timeout, TimeUnit.SECONDS);
         builder.writeTimeout(timeout, TimeUnit.SECONDS);
         builder.readTimeout(timeout, TimeUnit.SECONDS);
-    }
-
-    private void addBuilderOptions() {
-        builder.followRedirects(followRedirects);
     }
 
     private void addBuilderProxyInformation() {
