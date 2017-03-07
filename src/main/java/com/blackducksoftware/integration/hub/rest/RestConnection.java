@@ -88,6 +88,8 @@ public abstract class RestConnection {
 
     public IntLogger logger;
 
+    public boolean followRedirects;
+
     private OkHttpClient client;
 
     public static Date parseDateString(final String dateString) throws ParseException {
@@ -110,6 +112,7 @@ public abstract class RestConnection {
 
     public void connect() throws IntegrationException {
         addBuilderConnectionTimes();
+        addBuilderOptions();
         addBuilderProxyInformation();
         addBuilderAuthentication();
         setClient(builder.build());
@@ -119,6 +122,38 @@ public abstract class RestConnection {
     public abstract void addBuilderAuthentication() throws IntegrationException;
 
     public abstract void clientAuthenticate() throws IntegrationException;
+
+    private void addBuilderConnectionTimes() {
+        builder.connectTimeout(timeout, TimeUnit.SECONDS);
+        builder.writeTimeout(timeout, TimeUnit.SECONDS);
+        builder.readTimeout(timeout, TimeUnit.SECONDS);
+    }
+
+    private void addBuilderOptions() {
+        builder.followRedirects(followRedirects);
+    }
+
+    private void addBuilderProxyInformation() {
+        if (shouldUseProxyForUrl(hubBaseUrl)) {
+            builder.proxy(getProxy(hubBaseUrl));
+            builder.proxyAuthenticator(
+                    new com.blackducksoftware.integration.hub.proxy.OkAuthenticator(proxyUsername,
+                            proxyPassword));
+        }
+    }
+
+    private Proxy getProxy(final URL hubUrl) {
+        final Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
+        return proxy;
+    }
+
+    private boolean shouldUseProxyForUrl(final URL url) {
+        if (StringUtils.isBlank(proxyHost) || proxyPort <= 0) {
+            return false;
+        }
+        final List<Pattern> ignoredProxyHostPatterns = ProxyUtil.getIgnoredProxyHostPatterns(proxyNoHosts);
+        return !ProxyUtil.shouldIgnoreHost(url.getHost(), ignoredProxyHostPatterns);
+    }
 
     public HttpUrl createHttpUrl() {
         return HttpUrl.get(hubBaseUrl).newBuilder().build();
@@ -157,34 +192,6 @@ public abstract class RestConnection {
             }
         }
         return urlBuilder.build();
-    }
-
-    private void addBuilderConnectionTimes() throws IntegrationRestException {
-        builder.connectTimeout(timeout, TimeUnit.SECONDS);
-        builder.writeTimeout(timeout, TimeUnit.SECONDS);
-        builder.readTimeout(timeout, TimeUnit.SECONDS);
-    }
-
-    private void addBuilderProxyInformation() throws IntegrationRestException {
-        if (shouldUseProxyForUrl(hubBaseUrl)) {
-            builder.proxy(getProxy(hubBaseUrl));
-            builder.proxyAuthenticator(
-                    new com.blackducksoftware.integration.hub.proxy.OkAuthenticator(proxyUsername,
-                            proxyPassword));
-        }
-    }
-
-    private Proxy getProxy(final URL hubUrl) {
-        final Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
-        return proxy;
-    }
-
-    private boolean shouldUseProxyForUrl(final URL url) {
-        if (StringUtils.isBlank(proxyHost) || proxyPort <= 0) {
-            return false;
-        }
-        final List<Pattern> ignoredProxyHostPatterns = ProxyUtil.getIgnoredProxyHostPatterns(proxyNoHosts);
-        return !ProxyUtil.shouldIgnoreHost(url.getHost(), ignoredProxyHostPatterns);
     }
 
     public RequestBody createJsonRequestBody(final String content) {
