@@ -112,8 +112,50 @@ public abstract class RestConnection {
         addBuilderConnectionTimes();
         addBuilderProxyInformation();
         addBuilderAuthentication();
+        if (hubBaseUrl.getProtocol().equalsIgnoreCase("https")) {
+            addTlsConnectionInfo();
+        }
         setClient(builder.build());
         clientAuthenticate();
+    }
+
+    public void addTlsConnectionInfo() {
+        // final ConnectionSpec spec = new ConnectionSpec.Builder(ConnectionSpec.COMPATIBLE_TLS)
+        // .tlsVersions(TlsVersion.TLS_1_2, TlsVersion.TLS_1_1, TlsVersion.TLS_1_0)
+        // .cipherSuites(
+        // CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
+        // CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,
+        // CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA,
+        // CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA256)
+        // .build();
+        // X509TrustManager trustManager = null;
+        // try {
+        // final TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(
+        // TrustManagerFactory.getDefaultAlgorithm());
+        // trustManagerFactory.init((KeyStore) null);
+        // final TrustManager[] trustManagers = trustManagerFactory.getTrustManagers();
+        // if (trustManagers.length != 1 || !(trustManagers[0] instanceof X509TrustManager)) {
+        // throw new IllegalStateException("Unexpected default trust managers:"
+        // + Arrays.toString(trustManagers));
+        // }
+        // trustManager = (X509TrustManager) trustManagers[0];
+        // } catch (final GeneralSecurityException e) {
+        // throw new RuntimeException(e);
+        // }
+        // try {
+        // builder.sslSocketFactory(new TLSSocketFactory(), trustManager);
+        // } catch (KeyManagementException | NoSuchAlgorithmException e) {
+        // throw new RuntimeException(e);
+        // }
+        // final ConnectionSpec spec = new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)
+        // .tlsVersions(TlsVersion.TLS_1_2)
+        // .cipherSuites(
+        // CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
+        // CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,
+        // CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA,
+        // CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA256)
+        // .build();
+        // builder.connectionSpecs(Collections.singletonList(spec));
     }
 
     public abstract void addBuilderAuthentication() throws IntegrationException;
