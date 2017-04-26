@@ -27,8 +27,13 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URL;
+import java.security.GeneralSecurityException;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -37,6 +42,10 @@ import java.util.Map.Entry;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
+
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -112,50 +121,35 @@ public abstract class RestConnection {
         addBuilderConnectionTimes();
         addBuilderProxyInformation();
         addBuilderAuthentication();
-        if (hubBaseUrl.getProtocol().equalsIgnoreCase("https")) {
-            addTlsConnectionInfo();
-        }
+        addTlsConnectionInfo();
         setClient(builder.build());
         clientAuthenticate();
     }
 
-    public void addTlsConnectionInfo() {
-        // final ConnectionSpec spec = new ConnectionSpec.Builder(ConnectionSpec.COMPATIBLE_TLS)
-        // .tlsVersions(TlsVersion.TLS_1_2, TlsVersion.TLS_1_1, TlsVersion.TLS_1_0)
-        // .cipherSuites(
-        // CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
-        // CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,
-        // CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA,
-        // CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA256)
-        // .build();
-        // X509TrustManager trustManager = null;
-        // try {
-        // final TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(
-        // TrustManagerFactory.getDefaultAlgorithm());
-        // trustManagerFactory.init((KeyStore) null);
-        // final TrustManager[] trustManagers = trustManagerFactory.getTrustManagers();
-        // if (trustManagers.length != 1 || !(trustManagers[0] instanceof X509TrustManager)) {
-        // throw new IllegalStateException("Unexpected default trust managers:"
-        // + Arrays.toString(trustManagers));
-        // }
-        // trustManager = (X509TrustManager) trustManagers[0];
-        // } catch (final GeneralSecurityException e) {
-        // throw new RuntimeException(e);
-        // }
-        // try {
-        // builder.sslSocketFactory(new TLSSocketFactory(), trustManager);
-        // } catch (KeyManagementException | NoSuchAlgorithmException e) {
-        // throw new RuntimeException(e);
-        // }
-        // final ConnectionSpec spec = new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)
-        // .tlsVersions(TlsVersion.TLS_1_2)
-        // .cipherSuites(
-        // CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
-        // CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,
-        // CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA,
-        // CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA256)
-        // .build();
-        // builder.connectionSpecs(Collections.singletonList(spec));
+    public void addTlsConnectionInfo() throws IntegrationException {
+        final String version = System.getProperty("java.version");
+        if (hubBaseUrl.getProtocol().equalsIgnoreCase("https") && version.startsWith("1.7") || version.startsWith("1.6")) {
+            // We do not need to do this for Java 8+
+            X509TrustManager trustManager = null;
+            try {
+                final TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(
+                        TrustManagerFactory.getDefaultAlgorithm());
+                trustManagerFactory.init((KeyStore) null);
+                final TrustManager[] trustManagers = trustManagerFactory.getTrustManagers();
+                if (trustManagers.length != 1 || !(trustManagers[0] instanceof X509TrustManager)) {
+                    throw new IntegrationException("Unexpected default trust managers:" + Arrays.toString(trustManagers));
+                }
+                trustManager = (X509TrustManager) trustManagers[0];
+            } catch (final GeneralSecurityException e) {
+                throw new IntegrationException(e);
+            }
+            try {
+                // Java 7 does not enable TLS1.2 so we use our TLSSocketFactory to enable all protocols
+                builder.sslSocketFactory(new TLSSocketFactory(), trustManager);
+            } catch (KeyManagementException | NoSuchAlgorithmException e) {
+                throw new IntegrationException(e);
+            }
+        }
     }
 
     public abstract void addBuilderAuthentication() throws IntegrationException;
