@@ -43,6 +43,8 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class CredentialsRestConnection extends RestConnection {
+    private static final String X_CSRF_TOKEN = "X-CSRF-TOKEN";
+
     private final String hubUsername;
 
     private final String hubPassword;
@@ -86,6 +88,11 @@ public class CredentialsRestConnection extends RestConnection {
                 if (!response.isSuccessful()) {
                     throw new IntegrationRestException(response.code(), response.message(),
                             String.format("Connection Error: %s %s", response.code(), response.message()));
+                } else { // get the CSRF token
+                    final String csrfToken = response.header(X_CSRF_TOKEN);
+                    if (StringUtils.isNotBlank(csrfToken)) {
+                        commonRequestHeaders.put(X_CSRF_TOKEN, csrfToken);
+                    }
                 }
             } catch (final IOException e) {
                 throw new IntegrationException(e.getMessage(), e);
