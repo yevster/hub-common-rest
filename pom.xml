@@ -9,7 +9,7 @@
   </parent>
 
   <artifactId>hub-common-rest</artifactId>
-  <version>1.2.2-SNAPSHOT</version>
+  <version>1.2.2</version>
   <packaging>bundle</packaging>
 
   <name>Hub Common Rest</name>
@@ -27,7 +27,7 @@
     <dependency>
       <groupId>com.blackducksoftware.integration</groupId>
       <artifactId>integration-common</artifactId>
-      <version>5.7.2</version>
+      <version>5.7.3</version>
     </dependency>
     <dependency>
       <groupId>com.google.code.gson</groupId>
