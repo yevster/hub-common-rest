@@ -24,9 +24,11 @@
 package com.blackducksoftware.integration.hub.rest;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -181,7 +183,15 @@ public abstract class RestConnection {
         }
         if (queryParameters != null) {
             for (final Entry<String, String> queryParameter : queryParameters.entrySet()) {
-                urlBuilder.addQueryParameter(queryParameter.getKey(), queryParameter.getValue());
+                try {
+                    // As of okhttp 3.8.0 the escaped characters are space, ", ', <, >, #, &, and =, so we need to encode on our own
+                    // see HttpUrl.java, QUERY_COMPONENT_ENCODE_SET
+                    final String encodedKey = URLEncoder.encode(queryParameter.getKey(), "UTF-8");
+                    final String encodedVal = URLEncoder.encode(queryParameter.getValue(), "UTF-8");
+                    urlBuilder.addEncodedQueryParameter(encodedKey, encodedVal);
+                } catch (final UnsupportedEncodingException e) {
+                    logger.error(e);
+                }
             }
         }
         return urlBuilder.build();
