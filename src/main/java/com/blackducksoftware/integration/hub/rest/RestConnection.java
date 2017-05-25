@@ -24,11 +24,18 @@
 package com.blackducksoftware.integration.hub.rest;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.security.GeneralSecurityException;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -37,6 +44,10 @@ import java.util.Map.Entry;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
+
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -112,8 +123,35 @@ public abstract class RestConnection {
         addBuilderConnectionTimes();
         addBuilderProxyInformation();
         addBuilderAuthentication();
+        addTlsConnectionInfo();
         setClient(builder.build());
         clientAuthenticate();
+    }
+
+    public void addTlsConnectionInfo() throws IntegrationException {
+        final String version = System.getProperty("java.version");
+        if (hubBaseUrl.getProtocol().equalsIgnoreCase("https") && version.startsWith("1.7") || version.startsWith("1.6")) {
+            // We do not need to do this for Java 8+
+            X509TrustManager trustManager = null;
+            try {
+                final TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(
+                        TrustManagerFactory.getDefaultAlgorithm());
+                trustManagerFactory.init((KeyStore) null);
+                final TrustManager[] trustManagers = trustManagerFactory.getTrustManagers();
+                if (trustManagers.length != 1 || !(trustManagers[0] instanceof X509TrustManager)) {
+                    throw new IntegrationException("Unexpected default trust managers:" + Arrays.toString(trustManagers));
+                }
+                trustManager = (X509TrustManager) trustManagers[0];
+            } catch (final GeneralSecurityException e) {
+                throw new IntegrationException(e);
+            }
+            try {
+                // Java 7 does not enable TLS1.2 so we use our TLSSocketFactory to enable all protocols
+                builder.sslSocketFactory(new TLSSocketFactory(), trustManager);
+            } catch (KeyManagementException | NoSuchAlgorithmException e) {
+                throw new IntegrationException(e);
+            }
+        }
     }
 
     public abstract void addBuilderAuthentication() throws IntegrationException;
@@ -181,7 +219,15 @@ public abstract class RestConnection {
         }
         if (queryParameters != null) {
             for (final Entry<String, String> queryParameter : queryParameters.entrySet()) {
-                urlBuilder.addQueryParameter(queryParameter.getKey(), queryParameter.getValue());
+                try {
+                    // As of okhttp 3.8.0 the escaped characters are space, ", ', <, >, #, &, and =, so we need to encode on our own
+                    // see HttpUrl.java, QUERY_COMPONENT_ENCODE_SET
+                    final String encodedKey = URLEncoder.encode(queryParameter.getKey(), "UTF-8");
+                    final String encodedVal = URLEncoder.encode(queryParameter.getValue(), "UTF-8");
+                    urlBuilder.addEncodedQueryParameter(encodedKey, encodedVal);
+                } catch (final UnsupportedEncodingException e) {
+                    logger.error(e);
+                }
             }
         }
         return urlBuilder.build();
