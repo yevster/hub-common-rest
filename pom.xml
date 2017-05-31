@@ -5,12 +5,12 @@
   <parent>
     <groupId>com.blackducksoftware.integration</groupId>
     <artifactId>common-maven-parent</artifactId>
-    <version>3.0.0</version>
+    <version>4.0.0</version>
   </parent>
 
   <artifactId>hub-common-rest</artifactId>
-  <version>1.2.6-SNAPSHOT</version>
-  <packaging>bundle</packaging>
+  <version>2.0.0</version>
+  <packaging>jar</packaging>
 
   <name>Hub Common Rest</name>
   <description>General Code for Rest Connections to the Hub</description>
@@ -27,7 +27,7 @@
     <dependency>
       <groupId>com.blackducksoftware.integration</groupId>
       <artifactId>integration-common</artifactId>
-      <version>5.7.5</version>
+      <version>6.0.0</version>
     </dependency>
     <dependency>
       <groupId>com.google.code.gson</groupId>

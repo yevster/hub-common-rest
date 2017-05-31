@@ -220,13 +220,16 @@ public abstract class RestConnection {
         if (queryParameters != null) {
             for (final Entry<String, String> queryParameter : queryParameters.entrySet()) {
                 try {
-                    // As of okhttp 3.8.0 the escaped characters are space, ", ', <, >, #, &, and =, so we need to encode on our own
+                    // As of okhttp 3.8.0 the escaped characters are space, ", ', <, >, #, &, and =, so we need to
+                    // encode on our own
                     // see HttpUrl.java, QUERY_COMPONENT_ENCODE_SET
                     final String encodedKey = URLEncoder.encode(queryParameter.getKey(), "UTF-8");
                     final String encodedVal = URLEncoder.encode(queryParameter.getValue(), "UTF-8");
                     urlBuilder.addEncodedQueryParameter(encodedKey, encodedVal);
                 } catch (final UnsupportedEncodingException e) {
-                    logger.error(e);
+                    if (logger != null) {
+                        logger.error(e);
+                    }
                 }
             }
         }
@@ -299,7 +302,14 @@ public abstract class RestConnection {
     }
 
     public Response handleExecuteClientCall(final Request request) throws IntegrationException {
-        return handleExecuteClientCall(request, 0);
+        final long start = System.currentTimeMillis();
+        logMessage(LogLevel.TRACE, "starting request: " + request.url());
+        try {
+            return handleExecuteClientCall(request, 0);
+        } finally {
+            final long end = System.currentTimeMillis();
+            logMessage(LogLevel.TRACE, String.format("completed request: %s (%d ms)", request.url(), end - start));
+        }
     }
 
     private Response handleExecuteClientCall(final Request request, final int retryCount) throws IntegrationException {
