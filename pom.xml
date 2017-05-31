@@ -10,7 +10,6 @@
 
   <artifactId>hub-common-rest</artifactId>
   <version>2.0.1-SNAPSHOT</version>
-  <packaging>jar</packaging>
 
   <name>Hub Common Rest</name>
   <description>General Code for Rest Connections to the Hub</description>
