@@ -301,6 +301,15 @@ public abstract class RestConnection {
         return builder;
     }
 
+    private Request createNewRequest(final Request request) {
+        final Request.Builder builder = request.newBuilder();
+        for (final Map.Entry<String, String> entry : commonRequestHeaders.entrySet()) {
+            builder.header(entry.getKey(), entry.getValue());
+        }
+
+        return builder.build();
+    }
+
     public Response handleExecuteClientCall(final Request request) throws IntegrationException {
         final long start = System.currentTimeMillis();
         logMessage(LogLevel.TRACE, "starting request: " + request.url());
@@ -318,13 +327,18 @@ public abstract class RestConnection {
                 logRequestHeaders(request);
                 final Response response = client.newCall(request).execute();
                 if (!response.isSuccessful()) {
-                    if (response.code() == 401 && retryCount < 2) {
-                        connect();
-                        return handleExecuteClientCall(request, retryCount + 1);
-                    } else {
-                        throw new IntegrationRestException(response.code(), response.message(),
-                                String.format("There was a problem trying to %s this item: %s. Error: %s %s",
-                                        request.method(), request.url().uri().toString(), response.code(), response.message()));
+                    try {
+                        if (response.code() == 401 && retryCount < 2) {
+                            connect();
+                            final Request newRequest = createNewRequest(request);
+                            return handleExecuteClientCall(newRequest, retryCount + 1);
+                        } else {
+                            throw new IntegrationRestException(response.code(), response.message(),
+                                    String.format("There was a problem trying to %s this item: %s. Error: %s %s",
+                                            request.method(), request.url().uri().toString(), response.code(), response.message()));
+                        }
+                    } finally {
+                        response.close(); // request was un-sucessful make sure the response is closed to close the body
                     }
                 }
                 logResponseHeaders(response);
@@ -334,7 +348,8 @@ public abstract class RestConnection {
             }
         } else {
             connect();
-            return handleExecuteClientCall(request, retryCount);
+            final Request newRequest = createNewRequest(request);
+            return handleExecuteClientCall(newRequest, retryCount);
         }
     }
 
