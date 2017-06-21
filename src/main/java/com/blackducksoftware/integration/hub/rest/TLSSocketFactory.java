@@ -88,7 +88,7 @@ public class TLSSocketFactory extends SSLSocketFactory {
 
     private Socket enableTLSOnSocket(final Socket socket) {
         if (socket != null && (socket instanceof SSLSocket)) {
-            final TlsVersion[] tlsVersions = TlsVersion.values();
+            final TlsVersion[] tlsVersions = { TlsVersion.SSL_3_0, TlsVersion.TLS_1_0, TlsVersion.TLS_1_1, TlsVersion.TLS_1_2 };
             final String[] protocols = new String[tlsVersions.length];
             for (int i = 0; i < tlsVersions.length; i++) {
                 protocols[i] = tlsVersions[i].javaName();
