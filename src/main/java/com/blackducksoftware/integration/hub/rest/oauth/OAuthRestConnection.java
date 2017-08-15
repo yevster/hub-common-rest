@@ -30,9 +30,7 @@ import com.blackducksoftware.integration.hub.rest.RestConnection;
 import com.blackducksoftware.integration.log.IntLogger;
 
 public class OAuthRestConnection extends RestConnection {
-
     private final TokenManager tokenManager;
-
     private final AccessType accessType;
 
     public OAuthRestConnection(final IntLogger logger, final URL hubBaseUrl, final int timeout, final TokenManager tokenManager, final AccessType accessType) {
@@ -50,4 +48,5 @@ public class OAuthRestConnection extends RestConnection {
     public void clientAuthenticate() throws IntegrationException {
         tokenManager.refreshToken(accessType);
     }
+
 }
