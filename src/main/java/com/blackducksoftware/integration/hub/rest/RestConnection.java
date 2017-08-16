@@ -134,8 +134,7 @@ public abstract class RestConnection {
             // We do not need to do this for Java 8+
             X509TrustManager trustManager = null;
             try {
-                final TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(
-                        TrustManagerFactory.getDefaultAlgorithm());
+                final TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
                 trustManagerFactory.init((KeyStore) null);
                 final TrustManager[] trustManagers = trustManagerFactory.getTrustManagers();
                 if (trustManagers.length != 1 || !(trustManagers[0] instanceof X509TrustManager)) {
@@ -167,9 +166,7 @@ public abstract class RestConnection {
     private void addBuilderProxyInformation() {
         if (shouldUseProxyForUrl(hubBaseUrl)) {
             builder.proxy(getProxy(hubBaseUrl));
-            builder.proxyAuthenticator(
-                    new com.blackducksoftware.integration.hub.proxy.OkAuthenticator(proxyUsername,
-                            proxyPassword));
+            builder.proxyAuthenticator(new com.blackducksoftware.integration.hub.proxy.OkAuthenticator(proxyUsername, proxyPassword));
         }
     }
 
@@ -204,13 +201,11 @@ public abstract class RestConnection {
         return createHttpUrl(urlSegments, null);
     }
 
-    public HttpUrl createHttpUrl(final List<String> urlSegments,
-            final Map<String, String> queryParameters) {
+    public HttpUrl createHttpUrl(final List<String> urlSegments, final Map<String, String> queryParameters) {
         return createHttpUrl(hubBaseUrl.toString(), urlSegments, queryParameters);
     }
 
-    public HttpUrl createHttpUrl(final String providedUrl, final List<String> urlSegments,
-            final Map<String, String> queryParameters) {
+    public HttpUrl createHttpUrl(final String providedUrl, final List<String> urlSegments, final Map<String, String> queryParameters) {
         final HttpUrl.Builder urlBuilder = HttpUrl.parse(providedUrl).newBuilder();
         if (urlSegments != null) {
             for (final String urlSegment : urlSegments) {
@@ -247,7 +242,7 @@ public abstract class RestConnection {
     public RequestBody createEncodedFormBody(final Map<String, String> content) {
         final FormBody.Builder builder = new FormBody.Builder();
         for (final Entry<String, String> contentEntry : content.entrySet()) {
-            builder.addEncoded(contentEntry.getKey(), contentEntry.getValue());
+            builder.add(contentEntry.getKey(), contentEntry.getValue());
         }
         return builder.build();
     }
@@ -263,25 +258,19 @@ public abstract class RestConnection {
     }
 
     public Request createGetRequest(final HttpUrl httpUrl, final Map<String, String> headers) {
-        return getRequestBuilder(headers)
-                .url(httpUrl).get().build();
+        return getRequestBuilder(headers).url(httpUrl).get().build();
     }
 
     public Request createPostRequest(final HttpUrl httpUrl, final RequestBody body) {
-        return getRequestBuilder()
-                .url(httpUrl)
-                .post(body).build();
+        return getRequestBuilder().url(httpUrl).post(body).build();
     }
 
     public Request createPutRequest(final HttpUrl httpUrl, final RequestBody body) {
-        return getRequestBuilder()
-                .url(httpUrl)
-                .put(body).build();
+        return getRequestBuilder().url(httpUrl).put(body).build();
     }
 
     public Request createDeleteRequest(final HttpUrl httpUrl) {
-        return getRequestBuilder()
-                .url(httpUrl).delete().build();
+        return getRequestBuilder().url(httpUrl).delete().build();
     }
 
     private Request.Builder getRequestBuilder() {
@@ -334,8 +323,7 @@ public abstract class RestConnection {
                             return handleExecuteClientCall(newRequest, retryCount + 1);
                         } else {
                             throw new IntegrationRestException(response.code(), response.message(),
-                                    String.format("There was a problem trying to %s this item: %s. Error: %s %s",
-                                            request.method(), request.url().uri().toString(), response.code(), response.message()));
+                                    String.format("There was a problem trying to %s this item: %s. Error: %s %s", request.method(), request.url().uri().toString(), response.code(), response.message()));
                         }
                     } finally {
                         response.close(); // request was un-sucessful make sure the response is closed to close the body
