@@ -242,17 +242,9 @@ public abstract class RestConnection {
     public RequestBody createEncodedFormBody(final Map<String, String> content) {
         final FormBody.Builder builder = new FormBody.Builder();
         for (final Entry<String, String> contentEntry : content.entrySet()) {
-            builder.addEncoded(contentEntry.getKey(), preEncodeString(contentEntry.getValue()));
+            builder.add(contentEntry.getKey(), contentEntry.getValue());
         }
         return builder.build();
-    }
-
-    private String preEncodeString(String value) {
-        if (value != null) {
-            // Okhttp does not encode % so we must encode it ourselves
-            value = value.replaceAll("%", "%25");
-        }
-        return value;
     }
 
     public Request createGetRequest(final HttpUrl httpUrl) {
