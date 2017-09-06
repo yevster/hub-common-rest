@@ -14,9 +14,8 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 
-import com.blackducksoftware.integration.certificate.CertificateHandler
 import com.blackducksoftware.integration.exception.IntegrationException
-import com.blackducksoftware.integration.hub.rest.RestCertificateHandler
+import com.blackducksoftware.integration.hub.certificate.CertificateHandler
 import com.blackducksoftware.integration.log.IntLogger
 import com.blackducksoftware.integration.log.LogLevel
 import com.blackducksoftware.integration.log.PrintStreamIntLogger
@@ -33,10 +32,10 @@ import com.blackducksoftware.integration.log.PrintStreamIntLogger
  * with Black Duck Software.
  */
 
-class RestCertificateHandlerTest {
+class CertificateHandlerTest {
     private static final IntLogger logger = new PrintStreamIntLogger(System.out, LogLevel.TRACE)
 
-    private static final CertificateHandler CERT_HANDLER = new RestCertificateHandler(logger, null)
+    private static final CertificateHandler CERT_HANDLER = new CertificateHandler(logger, null)
 
     private static URL url
 
@@ -74,14 +73,14 @@ class RestCertificateHandlerTest {
 
     @Test
     public void testCertificateRetrieval() throws Exception {
-        final CertificateHandler certificateHandler = new RestCertificateHandler(logger, null)
+        final CertificateHandler certificateHandler = new CertificateHandler(logger, null)
         final Certificate output = certificateHandler.retrieveHttpsCertificateFromURL(url)
         assertNotNull(output)
     }
 
     @Test
     public void testRetrieveAndImportHttpsCertificate() throws Exception {
-        final CertificateHandler certificateHandler = new RestCertificateHandler(logger, null)
+        final CertificateHandler certificateHandler = new CertificateHandler(logger, null)
         certificateHandler.retrieveAndImportHttpsCertificate(url)
         assertTrue(certificateHandler.isCertificateInTrustStore(url))
         assertNotNull(certificateHandler.retrieveHttpsCertificateFromTrustStore(url))
@@ -95,7 +94,7 @@ class RestCertificateHandlerTest {
         assertTrue(tmpTrustStore.length() == 0)
         try {
             System.setProperty("javax.net.ssl.trustStore", tmpTrustStore.getAbsolutePath())
-            final CertificateHandler certificateHandler = new RestCertificateHandler(logger, null)
+            final CertificateHandler certificateHandler = new CertificateHandler(logger, null)
             certificateHandler.retrieveAndImportHttpsCertificate(url)
             assertTrue(certificateHandler.isCertificateInTrustStore(url))
             assertNotNull(certificateHandler.retrieveHttpsCertificateFromTrustStore(url))
@@ -113,8 +112,8 @@ class RestCertificateHandlerTest {
         final String javaHomeToManipulate = System.getProperty("JAVA_TO_MANIPULATE")
         Assume.assumeTrue(StringUtils.isNotBlank(javaHomeToManipulate))
 
-        final CertificateHandler certificateHandlerDefault = new RestCertificateHandler(logger, null)
-        final CertificateHandler certificateHandler = new RestCertificateHandler(logger, new File(javaHomeToManipulate))
+        final CertificateHandler certificateHandlerDefault = new CertificateHandler(logger, null)
+        final CertificateHandler certificateHandler = new CertificateHandler(logger, new File(javaHomeToManipulate))
 
         Certificate original = null
         if (certificateHandler.isCertificateInTrustStore(url)) {
