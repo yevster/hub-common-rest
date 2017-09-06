@@ -132,24 +132,27 @@ public abstract class RestConnection {
         final String version = System.getProperty("java.version");
         if (hubBaseUrl.getProtocol().equalsIgnoreCase("https") && version.startsWith("1.7") || version.startsWith("1.6")) {
             // We do not need to do this for Java 8+
-            X509TrustManager trustManager = null;
             try {
-                final TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-                trustManagerFactory.init((KeyStore) null);
-                final TrustManager[] trustManagers = trustManagerFactory.getTrustManagers();
-                if (trustManagers.length != 1 || !(trustManagers[0] instanceof X509TrustManager)) {
-                    throw new IntegrationException("Unexpected default trust managers:" + Arrays.toString(trustManagers));
-                }
-                trustManager = (X509TrustManager) trustManagers[0];
-            } catch (final GeneralSecurityException e) {
-                throw new IntegrationException(e);
-            }
-            try {
+                final X509TrustManager trustManager = systemDefaultTrustManager();
                 // Java 7 does not enable TLS1.2 so we use our TLSSocketFactory to enable all protocols
-                builder.sslSocketFactory(new TLSSocketFactory(), trustManager);
+                builder.sslSocketFactory(new TLSSocketFactory(trustManager), trustManager);
             } catch (KeyManagementException | NoSuchAlgorithmException e) {
                 throw new IntegrationException(e);
             }
+        }
+    }
+
+    private X509TrustManager systemDefaultTrustManager() throws IntegrationException {
+        try {
+            final TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            trustManagerFactory.init((KeyStore) null);
+            final TrustManager[] trustManagers = trustManagerFactory.getTrustManagers();
+            if (trustManagers.length != 1 || !(trustManagers[0] instanceof X509TrustManager)) {
+                throw new IllegalStateException("Unexpected default trust managers:" + Arrays.toString(trustManagers));
+            }
+            return (X509TrustManager) trustManagers[0];
+        } catch (final GeneralSecurityException e) {
+            throw new IntegrationException(); // The system has no TLS. Just give up.
         }
     }
 

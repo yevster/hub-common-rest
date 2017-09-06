@@ -33,6 +33,7 @@ import java.security.NoSuchAlgorithmException;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
 
 import okhttp3.TlsVersion;
 
@@ -40,9 +41,9 @@ public class TLSSocketFactory extends SSLSocketFactory {
 
     private final SSLSocketFactory internalSSLSocketFactory;
 
-    public TLSSocketFactory() throws KeyManagementException, NoSuchAlgorithmException {
+    public TLSSocketFactory(final TrustManager trustManager) throws KeyManagementException, NoSuchAlgorithmException {
         final SSLContext context = SSLContext.getInstance("TLS");
-        context.init(null, null, null);
+        context.init(null, new TrustManager[] { trustManager }, null);
         internalSSLSocketFactory = context.getSocketFactory();
     }
 
