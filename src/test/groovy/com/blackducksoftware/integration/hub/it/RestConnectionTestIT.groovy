@@ -119,22 +119,9 @@ class RestConnectionTestIT {
     @Test
     public void testTLS() throws Exception {
         final URL url = new URL(restConnectionTestHelper.getProperty("TEST_HTTPS_HUB_SERVER_URL"))
-        final CertificateHandler handler = new CertificateHandler(new PrintStreamIntLogger(System.out, LogLevel.DEBUG))
-        boolean skipTest = true
-        if (!handler.isCertificateInTrustStore(url)) {
-            try {
-                handler.retrieveAndImportHttpsCertificate(url)
-                skipTest = false
-            } catch (final IntegrationException e) {
-                logger.warn("The certificate can not be auto imported: " + e.getMessage(), e)
-            }
-        }
-        if (skipTest) {
-            return
-        }
-
         final CredentialsRestConnection restConnection = new CredentialsRestConnection(new PrintStreamIntLogger(System.out, LogLevel.INFO), url, "sysadmin", "blackduck", 120)
-
+        restConnection.alwaysTrustServerCertificate = true
+        
         final HubRequest hubRequest = new HubRequest(restConnection)
         hubRequest.url = url.toString() + "/api/projects"
         System.out.println("Executing: " + hubRequest.toString())

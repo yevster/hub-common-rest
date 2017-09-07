@@ -45,6 +45,8 @@ import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
@@ -52,6 +54,7 @@ import javax.net.ssl.X509TrustManager;
 import org.apache.commons.lang3.StringUtils;
 
 import com.blackducksoftware.integration.exception.IntegrationException;
+import com.blackducksoftware.integration.hub.certificate.CertTrustManager;
 import com.blackducksoftware.integration.hub.rest.exception.IntegrationRestException;
 import com.blackducksoftware.integration.log.IntLogger;
 import com.blackducksoftware.integration.log.LogLevel;
@@ -97,6 +100,8 @@ public abstract class RestConnection {
 
     public String proxyPassword;
 
+    public boolean alwaysTrustServerCertificate;
+
     public IntLogger logger;
 
     private OkHttpClient client;
@@ -129,16 +134,27 @@ public abstract class RestConnection {
     }
 
     public void addTlsConnectionInfo() throws IntegrationException {
-        final String version = System.getProperty("java.version");
-        if (hubBaseUrl.getProtocol().equalsIgnoreCase("https") && version.startsWith("1.7") || version.startsWith("1.6")) {
-            // We do not need to do this for Java 8+
-            try {
-                final X509TrustManager trustManager = systemDefaultTrustManager();
-                // Java 7 does not enable TLS1.2 so we use our TLSSocketFactory to enable all protocols
-                builder.sslSocketFactory(new TLSSocketFactory(trustManager), trustManager);
-            } catch (KeyManagementException | NoSuchAlgorithmException e) {
-                throw new IntegrationException(e);
+        if (hubBaseUrl.getProtocol().equalsIgnoreCase("https")) {
+            X509TrustManager trustManager = null;
+            if (alwaysTrustServerCertificate) {
+                trustManager = new CertTrustManager();
+            } else {
+                trustManager = systemDefaultTrustManager();
             }
+            final String version = System.getProperty("java.version");
+            SSLSocketFactory sSLSocketFactory = null;
+            if (version.startsWith("1.7") || version.startsWith("1.6")) {
+                // We do not need to do this for Java 8+
+                try {
+                    // Java 7 does not enable TLS1.2 so we use our TLSSocketFactory to enable all protocols
+                    sSLSocketFactory = new TLSSocketFactory(trustManager);
+                } catch (KeyManagementException | NoSuchAlgorithmException e) {
+                    throw new IntegrationException(e);
+                }
+            } else {
+                sSLSocketFactory = systemDefaultSslSocketFactory(trustManager);
+            }
+            builder.sslSocketFactory(sSLSocketFactory, trustManager);
         }
     }
 
@@ -153,6 +169,16 @@ public abstract class RestConnection {
             return (X509TrustManager) trustManagers[0];
         } catch (final GeneralSecurityException e) {
             throw new IntegrationException(); // The system has no TLS. Just give up.
+        }
+    }
+
+    private SSLSocketFactory systemDefaultSslSocketFactory(final X509TrustManager trustManager) throws IntegrationException {
+        try {
+            final SSLContext sslContext = SSLContext.getInstance("TLS");
+            sslContext.init(null, new TrustManager[] { trustManager }, null);
+            return sslContext.getSocketFactory();
+        } catch (final GeneralSecurityException e) {
+            throw new IntegrationException(e); // The system has no TLS. Just give up.
         }
     }
 

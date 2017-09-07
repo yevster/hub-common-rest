@@ -123,7 +123,7 @@ public class RestConnectionTestHelper {
 
         return restConnection;
     }
-
+    
     public File getFile(final String classpathResource) {
         try {
             final URL url = Thread.currentThread().getContextClassLoader().getResource(classpathResource)
