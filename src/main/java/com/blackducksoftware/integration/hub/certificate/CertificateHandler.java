@@ -93,7 +93,6 @@ public class CertificateHandler {
             return;
         }
         try {
-
             final Certificate certificate = retrieveHttpsCertificateFromURL(url);
             if (certificate == null) {
                 throw new IntegrationCertificateException(String.format("Could not retrieve the Certificate from %s", url));
@@ -112,33 +111,9 @@ public class CertificateHandler {
         }
         logger.info(String.format("Retrieving the certificate from %s", url));
 
-        final CertTrustManager trustManager = new CertTrustManager();
         Certificate certificate = null;
         try {
-            final OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder();
-
-            clientBuilder.connectTimeout(timeout, TimeUnit.SECONDS);
-            clientBuilder.writeTimeout(timeout, TimeUnit.SECONDS);
-            clientBuilder.readTimeout(timeout, TimeUnit.SECONDS);
-
-            if (shouldUseProxyForUrl(url)) {
-                clientBuilder.proxy(getProxy(url));
-                clientBuilder.proxyAuthenticator(new com.blackducksoftware.integration.hub.proxy.OkAuthenticator(proxyUsername, proxyPassword));
-            }
-
-            final String version = System.getProperty("java.version");
-            if (url.getProtocol().equalsIgnoreCase("https") && version.startsWith("1.7") || version.startsWith("1.6")) {
-                // We do not need to do this for Java 8+
-                try {
-                    // Java 7 does not enable TLS1.2 so we use our TLSSocketFactory to enable all protocols
-                    clientBuilder.sslSocketFactory(new TLSSocketFactory(trustManager), trustManager);
-                } catch (KeyManagementException | NoSuchAlgorithmException e) {
-                    throw new IntegrationException(e);
-                }
-            } else {
-                clientBuilder.sslSocketFactory(systemDefaultSslSocketFactory(trustManager), trustManager);
-            }
-            final OkHttpClient client = clientBuilder.build();
+            final OkHttpClient client = getOkHttpClient(url);
 
             final HttpUrl.Builder urlBuilder = HttpUrl.get(url).newBuilder();
             final HttpUrl httpUrl = urlBuilder.build();
@@ -155,6 +130,34 @@ public class CertificateHandler {
             throw new IntegrationException(e);
         }
         return certificate;
+    }
+
+    protected OkHttpClient getOkHttpClient(final URL url) throws IntegrationException {
+        final CertTrustManager trustManager = new CertTrustManager();
+        final OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder();
+
+        clientBuilder.connectTimeout(timeout, TimeUnit.SECONDS);
+        clientBuilder.writeTimeout(timeout, TimeUnit.SECONDS);
+        clientBuilder.readTimeout(timeout, TimeUnit.SECONDS);
+
+        if (shouldUseProxyForUrl(url)) {
+            clientBuilder.proxy(getProxy(url));
+            clientBuilder.proxyAuthenticator(new com.blackducksoftware.integration.hub.proxy.OkAuthenticator(proxyUsername, proxyPassword));
+        }
+
+        final String version = System.getProperty("java.version");
+        if (url.getProtocol().equalsIgnoreCase("https") && version.startsWith("1.7") || version.startsWith("1.6")) {
+            // We do not need to do this for Java 8+
+            try {
+                // Java 7 does not enable TLS1.2 so we use our TLSSocketFactory to enable all protocols
+                clientBuilder.sslSocketFactory(new TLSSocketFactory(trustManager), trustManager);
+            } catch (KeyManagementException | NoSuchAlgorithmException e) {
+                throw new IntegrationException(e);
+            }
+        } else {
+            clientBuilder.sslSocketFactory(systemDefaultSslSocketFactory(trustManager), trustManager);
+        }
+        return clientBuilder.build();
     }
 
     public Certificate retrieveHttpsCertificateFromTrustStore(final URL url) throws IntegrationException {

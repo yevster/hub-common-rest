@@ -342,6 +342,11 @@ public abstract class RestConnection {
     private Response handleExecuteClientCall(final Request request, final int retryCount) throws IntegrationException {
         if (client != null) {
             try {
+                final URL url = request.url().url();
+                final String urlString = request.url().uri().toString();
+                if (alwaysTrustServerCertificate && url.getProtocol().equalsIgnoreCase("https")) {
+                    logger.info("Automatically trusting the certificate for " + urlString);
+                }
                 logRequestHeaders(request);
                 final Response response = client.newCall(request).execute();
                 if (!response.isSuccessful()) {
@@ -352,10 +357,10 @@ public abstract class RestConnection {
                             return handleExecuteClientCall(newRequest, retryCount + 1);
                         } else {
                             throw new IntegrationRestException(response.code(), response.message(),
-                                    String.format("There was a problem trying to %s this item: %s. Error: %s %s", request.method(), request.url().uri().toString(), response.code(), response.message()));
+                                    String.format("There was a problem trying to %s this item: %s. Error: %s %s", request.method(), urlString, response.code(), response.message()));
                         }
                     } finally {
-                        response.close(); // request was un-sucessful make sure the response is closed to close the body
+                        response.close(); // request was un-successful make sure the response is closed to close the body
                     }
                 }
                 logResponseHeaders(response);
