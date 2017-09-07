@@ -28,6 +28,10 @@ import java.util.logging.Logger
 
 import org.junit.Assert;
 
+import com.blackducksoftware.integration.hub.rest.CredentialsRestConnection
+import com.blackducksoftware.integration.log.LogLevel
+import com.blackducksoftware.integration.log.PrintStreamIntLogger
+
 import okhttp3.OkHttpClient
 
 public class RestConnectionTestHelper {
@@ -109,6 +113,16 @@ public class RestConnectionTestHelper {
         return getProperty(TestingPropertyKey.TEST_PASSWORD)
     }
 
+    public CredentialsRestConnection getRestConnection() {
+        return getRestConnection(LogLevel.TRACE);
+    }
+
+    public CredentialsRestConnection getRestConnection(final LogLevel logLevel) {
+        final CredentialsRestConnection restConnection = new CredentialsRestConnection(new PrintStreamIntLogger(System.out, logLevel),
+                getIntegrationHubServerUrl(), getTestUsername(), getTestPassword(), 120);
+
+        return restConnection;
+    }
 
     public File getFile(final String classpathResource) {
         try {
