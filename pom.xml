@@ -21,7 +21,7 @@
     <developerConnection>scm:git:git@github.com:blackducksoftware/hub-common-rest.git</developerConnection>
     <url>https://www.github.com/blackducksoftware/hub-common-rest</url>
   </scm>
-  
+
   <properties>
     <skipITTests>true</skipITTests>
   </properties>
@@ -86,6 +86,23 @@
             <version>2.4.8</version>
           </dependency>
         </dependencies>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <version>2.17</version>
+        <executions>
+          <execution>
+            <id>integration-tests</id>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <skipITs>${skipITTests}</skipITs>
+        </configuration>
       </plugin>
     </plugins>
   </build>
