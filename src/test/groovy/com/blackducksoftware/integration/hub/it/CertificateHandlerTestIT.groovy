@@ -21,7 +21,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.blackducksoftware.integration.hub
+package com.blackducksoftware.integration.hub.it
 
 import static org.junit.Assert.assertFalse
 import static org.junit.Assert.assertNotNull
@@ -55,7 +55,7 @@ import com.blackducksoftware.integration.log.PrintStreamIntLogger
  * with Black Duck Software.
  */
 
-class CertificateHandlerTest {
+class CertificateHandlerTestIT {
     private static final IntLogger logger = new PrintStreamIntLogger(System.out, LogLevel.TRACE)
 
     private static final CertificateHandler CERT_HANDLER = new CertificateHandler(logger, null)
@@ -69,10 +69,9 @@ class CertificateHandlerTest {
 
     @BeforeClass
     public static void init() throws Exception {
-        final String urlString = System.getProperty("hub.https.url")
-        // assumeTrue expects the condition to be true, if it is not then it skips the test
+        RestConnectionTestHelper restConnectionTestHelper = new RestConnectionTestHelper()
+        final String urlString = restConnectionTestHelper.getProperty("TEST_HTTPS_HUB_SERVER_URL")
         logger.info("Using Hub server ${urlString}")
-        Assume.assumeTrue(StringUtils.isNotBlank(urlString))
         url = new URL(urlString)
         try {
             final boolean isCertificateInKeystore = CERT_HANDLER.isCertificateInTrustStore(url)
@@ -160,5 +159,4 @@ class CertificateHandlerTest {
             }
         }
     }
-
 }

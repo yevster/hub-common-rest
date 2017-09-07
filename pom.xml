@@ -21,6 +21,10 @@
     <developerConnection>scm:git:git@github.com:blackducksoftware/hub-common-rest.git</developerConnection>
     <url>https://www.github.com/blackducksoftware/hub-common-rest</url>
   </scm>
+  
+  <properties>
+    <skipITTests>true</skipITTests>
+  </properties>
 
   <dependencies>
     <dependency>
