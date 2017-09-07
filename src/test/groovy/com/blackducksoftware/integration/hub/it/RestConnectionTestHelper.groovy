@@ -23,24 +23,64 @@
  */
 package com.blackducksoftware.integration.hub.it
 
-import static org.junit.Assert.fail
+import java.util.logging.Level
+import java.util.logging.Logger
 
-import com.blackducksoftware.integration.hub.rest.CredentialsRestConnection
-import com.blackducksoftware.integration.log.LogLevel
-import com.blackducksoftware.integration.log.PrintStreamIntLogger
+import org.junit.Assert;
+
+import okhttp3.OkHttpClient
 
 public class RestConnectionTestHelper {
-    private Properties testProperties
+    private Properties testProperties;
+
+    private final String hubServerUrl;
 
     public RestConnectionTestHelper() {
+        initProperties()
+        this.hubServerUrl = getProperty(TestingPropertyKey.TEST_HUB_SERVER_URL)
+    }
+
+    public RestConnectionTestHelper(final String hubServerUrlPropertyName) {
+        initProperties()
+        this.hubServerUrl = testProperties.getProperty(hubServerUrlPropertyName)
+    }
+
+    private void initProperties() {
+        Logger.getLogger(OkHttpClient.class.getName()).setLevel(Level.FINE)
         testProperties = new Properties()
         final ClassLoader classLoader = Thread.currentThread().getContextClassLoader()
-        final InputStream is = classLoader.getResourceAsStream("test.properties")
-        try {
+        InputStream is = null;
+        try  {
+            is = classLoader.getResourceAsStream("test.properties")
             testProperties.load(is)
-        } catch (final IOException e) {
+        } catch (final Exception e) {
             System.err.println("reading test.properties failed!")
+        } finally {
+            if(is != null) {
+                is.close()
+            }
         }
+
+        if (testProperties.isEmpty()) {
+            try {
+                loadOverrideProperties(TestingPropertyKey.values())
+            } catch (final Exception e) {
+                System.err.println("reading properties from the environment failed")
+            }
+        }
+    }
+
+    private void loadOverrideProperties(final TestingPropertyKey[] keys) {
+        for (final TestingPropertyKey key : keys) {
+            final String prop = System.getenv(key.toString())
+            if (prop != null && !prop.isEmpty()) {
+                testProperties.setProperty(key.toString(), prop)
+            }
+        }
+    }
+
+    public String getProperty(final TestingPropertyKey key) {
+        return getProperty(key.toString())
     }
 
     public String getProperty(final String key) {
@@ -48,7 +88,7 @@ public class RestConnectionTestHelper {
     }
 
     public String getIntegrationHubServerUrlString() {
-        return testProperties.getProperty("TEST_HUB_SERVER_URL")
+        return hubServerUrl
     }
 
     public URL getIntegrationHubServerUrl() {
@@ -62,23 +102,13 @@ public class RestConnectionTestHelper {
     }
 
     public String getTestUsername() {
-        return testProperties.getProperty("TEST_USERNAME")
+        return getProperty(TestingPropertyKey.TEST_USERNAME)
     }
 
     public String getTestPassword() {
-        return testProperties.getProperty("TEST_PASSWORD")
+        return getProperty(TestingPropertyKey.TEST_PASSWORD)
     }
 
-    public CredentialsRestConnection getRestConnection() {
-        return getRestConnection(LogLevel.TRACE)
-    }
-
-    public CredentialsRestConnection getRestConnection(final LogLevel logLevel) {
-        final CredentialsRestConnection restConnection = new CredentialsRestConnection(new PrintStreamIntLogger(System.out, logLevel),
-                getIntegrationHubServerUrl(), getTestUsername(), getTestPassword(), 120)
-
-        return restConnection
-    }
 
     public File getFile(final String classpathResource) {
         try {
@@ -86,7 +116,7 @@ public class RestConnectionTestHelper {
             final File file = new File(url.toURI().getPath())
             return file
         } catch (final Exception e) {
-            fail("Could not get file: " + e.getMessage())
+            Assert.fail("Could not get file: " + e.getMessage())
             return null
         }
     }
