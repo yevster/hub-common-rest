@@ -21,82 +21,73 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.blackducksoftware.integration.hub.it;
+package com.blackducksoftware.integration.hub.it
 
-import static org.junit.Assert.fail;
+import static org.junit.Assert.fail
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Properties;
-
-import com.blackducksoftware.integration.hub.rest.CredentialsRestConnection;
-import com.blackducksoftware.integration.log.LogLevel;
-import com.blackducksoftware.integration.log.PrintStreamIntLogger;
+import com.blackducksoftware.integration.hub.rest.CredentialsRestConnection
+import com.blackducksoftware.integration.log.LogLevel
+import com.blackducksoftware.integration.log.PrintStreamIntLogger
 
 public class RestConnectionTestHelper {
-    private final Properties testProperties;
+    private Properties testProperties
 
     public RestConnectionTestHelper() {
-        testProperties = new Properties();
-        final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        final InputStream is = classLoader.getResourceAsStream("test.properties");
+        testProperties = new Properties()
+        final ClassLoader classLoader = Thread.currentThread().getContextClassLoader()
+        final InputStream is = classLoader.getResourceAsStream("test.properties")
         try {
-            testProperties.load(is);
+            testProperties.load(is)
         } catch (final IOException e) {
-            System.err.println("reading test.properties failed!");
+            System.err.println("reading test.properties failed!")
         }
-
     }
 
     public String getProperty(final String key) {
-        return testProperties.getProperty(key);
+        return testProperties.getProperty(key)
     }
 
     public String getIntegrationHubServerUrlString() {
-        return testProperties.getProperty("TEST_HUB_SERVER_URL");
+        return testProperties.getProperty("TEST_HUB_SERVER_URL")
     }
 
     public URL getIntegrationHubServerUrl() {
-        URL url;
+        URL url
         try {
-            url = new URL(getIntegrationHubServerUrlString());
+            url = new URL(getIntegrationHubServerUrlString())
         } catch (final MalformedURLException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException(e)
         }
-        return url;
+        return url
     }
 
     public String getTestUsername() {
-        return testProperties.getProperty("TEST_USERNAME");
+        return testProperties.getProperty("TEST_USERNAME")
     }
 
     public String getTestPassword() {
-        return testProperties.getProperty("TEST_PASSWORD");
+        return testProperties.getProperty("TEST_PASSWORD")
     }
 
     public CredentialsRestConnection getRestConnection() {
-        return getRestConnection(LogLevel.TRACE);
+        return getRestConnection(LogLevel.TRACE)
     }
 
     public CredentialsRestConnection getRestConnection(final LogLevel logLevel) {
         final CredentialsRestConnection restConnection = new CredentialsRestConnection(new PrintStreamIntLogger(System.out, logLevel),
-                getIntegrationHubServerUrl(), getTestUsername(), getTestPassword(), 120);
+                getIntegrationHubServerUrl(), getTestUsername(), getTestPassword(), 120)
 
-        return restConnection;
+        return restConnection
     }
 
     public File getFile(final String classpathResource) {
         try {
-            final URL url = Thread.currentThread().getContextClassLoader().getResource(classpathResource);
-            final File file = new File(url.toURI().getPath());
-            return file;
+            final URL url = Thread.currentThread().getContextClassLoader().getResource(classpathResource)
+            final File file = new File(url.toURI().getPath())
+            return file
         } catch (final Exception e) {
-            fail("Could not get file: " + e.getMessage());
-            return null;
+            fail("Could not get file: " + e.getMessage())
+            return null
         }
     }
-
 }
