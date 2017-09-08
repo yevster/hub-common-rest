@@ -345,7 +345,7 @@ public abstract class RestConnection {
                 final URL url = request.url().url();
                 final String urlString = request.url().uri().toString();
                 if (alwaysTrustServerCertificate && url.getProtocol().equalsIgnoreCase("https")) {
-                    logger.info("Automatically trusting the certificate for " + urlString);
+                    logger.debug("Automatically trusting the certificate for " + urlString);
                 }
                 logRequestHeaders(request);
                 final Response response = client.newCall(request).execute();
