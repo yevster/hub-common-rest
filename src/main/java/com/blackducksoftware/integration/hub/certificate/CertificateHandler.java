@@ -222,7 +222,7 @@ public class CertificateHandler {
         }
     }
 
-    private KeyStore getKeyStore(final File trustStore) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
+    public KeyStore getKeyStore(final File trustStore) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
         // trustStore must be an existing file and it must not be empty,
         // otherwise we create a new empty keystore
         if (trustStore.isFile() && trustStore.length() > 0) {
@@ -246,7 +246,7 @@ public class CertificateHandler {
         return System.getProperty("javax.net.ssl.trustStorePassword", "changeit").toCharArray();
     }
 
-    private File getTrustStore() {
+    public File getTrustStore() {
         File trustStore;
         if (javaHomeOverride != null) {
             trustStore = resolveTrustStoreFile(javaHomeOverride);
