@@ -9,7 +9,7 @@
   </parent>
 
   <artifactId>hub-common-rest</artifactId>
-  <version>2.5.0</version>
+  <version>2.5.1-SNAPSHOT</version>
 
   <name>Hub Common Rest</name>
   <description>General Code for Rest Connections to the Hub</description>
