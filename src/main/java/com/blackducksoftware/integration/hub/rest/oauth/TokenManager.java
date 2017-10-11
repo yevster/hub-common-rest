@@ -40,11 +40,8 @@ public class TokenManager {
     public static final String WWW_AUTH_RESP = "Authorization";
 
     private final IntLogger logger;
-
     private final int timeout;
-
     private OAuthConfiguration configuration;
-
     private Token clientToken;
 
     public TokenManager(final IntLogger logger, final int timeout) {
@@ -120,8 +117,7 @@ public class TokenManager {
                 final RestConnection connection = new UnauthenticatedRestConnection(logger, url, timeout);
 
                 final HubOAuthTokenService tokenService = new HubOAuthTokenService(connection);
-                result = tokenService.refreshUserToken(configuration.clientId,
-                        configuration.refreshToken);
+                result = tokenService.refreshUserToken(configuration.clientId, configuration.refreshToken);
             } catch (final IntegrationException | MalformedURLException ex) {
                 throw new IntegrationException("Error refreshing user token", ex);
             }
@@ -146,4 +142,5 @@ public class TokenManager {
         }
         return result;
     }
+
 }

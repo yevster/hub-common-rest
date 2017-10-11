@@ -24,14 +24,9 @@
 package com.blackducksoftware.integration.hub;
 
 public class RestConstants {
-
-    // query parameters
     public static final String QUERY_OFFSET = "offset";
-
     public static final String QUERY_LIMIT = "limit";
-
     public static final String QUERY_Q = "q";
-
     public static final String QUERY_VERSION = "version";
 
 }

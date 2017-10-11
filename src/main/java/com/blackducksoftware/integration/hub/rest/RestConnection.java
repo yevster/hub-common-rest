@@ -79,29 +79,17 @@ public abstract class RestConnection {
     public static final String JSON_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSX";
 
     public final Gson gson = new GsonBuilder().setDateFormat(JSON_DATE_FORMAT).create();
-
     public final JsonParser jsonParser = new JsonParser();
-
     public final OkHttpClient.Builder builder = new OkHttpClient.Builder();
-
     public final Map<String, String> commonRequestHeaders = new HashMap<>();
-
     public final URL hubBaseUrl;
-
     public int timeout = 120;
-
     public String proxyHost;
-
     public int proxyPort;
-
     public String proxyNoHosts;
-
     public String proxyUsername;
-
     public String proxyPassword;
-
     public boolean alwaysTrustServerCertificate;
-
     public IntLogger logger;
 
     private OkHttpClient client;
@@ -168,7 +156,8 @@ public abstract class RestConnection {
             }
             return (X509TrustManager) trustManagers[0];
         } catch (final GeneralSecurityException e) {
-            throw new IntegrationException(); // The system has no TLS. Just give up.
+            // The system has no TLS. Just give up.
+            throw new IntegrationException();
         }
     }
 
@@ -178,7 +167,8 @@ public abstract class RestConnection {
             sslContext.init(null, new TrustManager[] { trustManager }, null);
             return sslContext.getSocketFactory();
         } catch (final GeneralSecurityException e) {
-            throw new IntegrationException(e); // The system has no TLS. Just give up.
+            // The system has no TLS. Just give up.
+            throw new IntegrationException(e);
         }
     }
 
@@ -360,7 +350,8 @@ public abstract class RestConnection {
                                     String.format("There was a problem trying to %s this item: %s. Error: %s %s", request.method(), urlString, response.code(), response.message()));
                         }
                     } finally {
-                        response.close(); // request was un-successful make sure the response is closed to close the body
+                        // request was un-successful make sure the response is closed to close the body
+                        response.close();
                     }
                 }
                 logResponseHeaders(response);

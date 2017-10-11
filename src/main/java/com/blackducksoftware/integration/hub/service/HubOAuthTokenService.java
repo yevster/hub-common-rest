@@ -40,7 +40,6 @@ import okhttp3.Response;
 
 public class HubOAuthTokenService {
     private final Gson gson;
-
     private final HubRequestFactory hubRequestFactory;
 
     public HubOAuthTokenService(final RestConnection restConnection) {
@@ -48,13 +47,11 @@ public class HubOAuthTokenService {
         this.hubRequestFactory = new HubRequestFactory(restConnection);
     }
 
-    public Token requestUserToken(final String clientId, final String authCode, final String redirectUri)
-            throws IntegrationException {
+    public Token requestUserToken(final String clientId, final String authCode, final String redirectUri) throws IntegrationException {
         return requestUserToken(clientId, null, authCode, redirectUri);
     }
 
-    public Token requestUserToken(final String clientId, final String clientSecret, final String authCode, final String redirectUri)
-            throws IntegrationException {
+    public Token requestUserToken(final String clientId, final String clientSecret, final String authCode, final String redirectUri) throws IntegrationException {
         final Map<String, String> formDataMap = new LinkedHashMap<>();
         formDataMap.put("grant_type", "authorization_code");
         formDataMap.put("redirect_uri", redirectUri);

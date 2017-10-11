@@ -40,4 +40,5 @@ public class UnauthenticatedRestConnection extends RestConnection {
     @Override
     public void clientAuthenticate() throws IntegrationException {
     }
+
 }

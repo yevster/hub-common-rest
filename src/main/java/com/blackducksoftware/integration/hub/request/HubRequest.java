@@ -42,19 +42,13 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 /**
- * Most usages of the Hub endpoints as of 2016-11-23 (Hub 3.3.1) should use the HubPagedRequest, but there are several
- * REST endpoints
- * that do not consume limit or offset, and those should use this implementation.
+ * Most usages of the Hub endpoints as of 2016-11-23 (Hub 3.3.1) should use the HubPagedRequest, but there are several REST endpoints that do not consume limit or offset, and those should use this implementation.
  */
 public class HubRequest {
     public final RestConnection restConnection;
-
     public String url;
-
     public final List<String> urlSegments = new ArrayList<>();
-
     public final Map<String, String> queryParameters = new HashMap<>();
-
     public String q;
 
     public HubRequest(final RestConnection restConnection) {

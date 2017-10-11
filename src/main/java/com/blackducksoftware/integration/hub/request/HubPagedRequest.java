@@ -31,12 +31,10 @@ import java.util.Map;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
 
 /**
- * This should be used to communicate to the Hub REST endpoints that can return many items across pages of data. These
- * are the endpoints that have the limit and offset query parameters.
+ * This should be used to communicate to the Hub REST endpoints that can return many items across pages of data. These are the endpoints that have the limit and offset query parameters.
  */
 public class HubPagedRequest extends HubRequest {
     public int limit = 10;
-
     public int offset = 0;
 
     public HubPagedRequest(final RestConnection restConnection) {

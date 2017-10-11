@@ -35,21 +35,14 @@ import okhttp3.Response;
 import okhttp3.Route;
 
 public class OkAuthenticator implements Authenticator {
-
     public static final String PROXY_AUTH = "Proxy-Authenticate";
-
     public static final String PROXY_AUTH_RESP = "Proxy-Authorization";
-
     public static final String WWW_AUTH = "WWW-Authenticate";
-
     public static final String WWW_AUTH_RESP = "Authorization";
 
     private final String username;
-
     private final String password;
-
     private boolean proxy;
-
     private boolean basicAuth;
 
     public OkAuthenticator(final String username, final String password) {

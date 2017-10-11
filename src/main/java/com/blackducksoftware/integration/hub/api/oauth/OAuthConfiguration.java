@@ -25,14 +25,12 @@ package com.blackducksoftware.integration.hub.api.oauth;
 
 public class OAuthConfiguration {
     public String clientId;
-
     public String clientSecret;
-
     public String callbackUrl;
-
     public String authorizeUri;
-
     public String tokenUri;
 
-    public String refreshToken; // previously persisted refresh token
+    // previously persisted refresh token
+    public String refreshToken;
+
 }

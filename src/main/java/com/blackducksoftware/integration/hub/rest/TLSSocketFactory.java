@@ -38,7 +38,6 @@ import javax.net.ssl.TrustManager;
 import okhttp3.TlsVersion;
 
 public class TLSSocketFactory extends SSLSocketFactory {
-
     private final SSLSocketFactory internalSSLSocketFactory;
 
     public TLSSocketFactory(final TrustManager trustManager) throws KeyManagementException, NoSuchAlgorithmException {
@@ -99,4 +98,5 @@ public class TLSSocketFactory extends SSLSocketFactory {
         }
         return socket;
     }
+
 }

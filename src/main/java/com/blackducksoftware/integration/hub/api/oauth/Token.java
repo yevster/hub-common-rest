@@ -26,7 +26,6 @@ package com.blackducksoftware.integration.hub.api.oauth;
 import com.google.gson.annotations.SerializedName;
 
 public class Token {
-
     @SerializedName("access_token")
     public String accessToken;
 
@@ -40,6 +39,6 @@ public class Token {
     public String expiresIn;
 
     public String scope;
-
     public String jti;
+
 }

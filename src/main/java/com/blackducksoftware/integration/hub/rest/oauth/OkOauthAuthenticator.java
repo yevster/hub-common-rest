@@ -35,9 +35,7 @@ import okhttp3.Route;
 
 public class OkOauthAuthenticator implements Authenticator {
     private final TokenManager tokenManager;
-
     private final AccessType accessType;
-
     private final RestConnection restConnection;
 
     public OkOauthAuthenticator(final TokenManager tokenManager, final AccessType accessType, final RestConnection restConnection) {
@@ -61,4 +59,5 @@ public class OkOauthAuthenticator implements Authenticator {
             return response.request().newBuilder().header(TokenManager.WWW_AUTH_RESP, credential).build();
         }
     }
+
 }

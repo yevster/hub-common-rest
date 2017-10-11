@@ -27,11 +27,9 @@ import com.blackducksoftware.integration.exception.IntegrationException;
 
 public class IntegrationRestException extends IntegrationException {
     private final int httpStatusCode;
-
     private final String httpStatusMessage;
 
-    public IntegrationRestException(final int httpStatusCode, final String httpStatusMessage, final String message, final Throwable cause,
-            final boolean enableSuppression, final boolean writableStackTrace) {
+    public IntegrationRestException(final int httpStatusCode, final String httpStatusMessage, final String message, final Throwable cause, final boolean enableSuppression, final boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
         this.httpStatusCode = httpStatusCode;
         this.httpStatusMessage = httpStatusMessage;

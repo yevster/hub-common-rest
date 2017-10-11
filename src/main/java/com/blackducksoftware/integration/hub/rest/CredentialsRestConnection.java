@@ -46,7 +46,6 @@ public class CredentialsRestConnection extends RestConnection {
     private static final String X_CSRF_TOKEN = "X-CSRF-TOKEN";
 
     private final String hubUsername;
-
     private final String hubPassword;
 
     public CredentialsRestConnection(final IntLogger logger, final URL hubBaseUrl, final String hubUsername, final String hubPassword, final int timeout) {
@@ -65,8 +64,7 @@ public class CredentialsRestConnection extends RestConnection {
     }
 
     /**
-     * Gets the cookie for the Authorized connection to the Hub server. Returns
-     * the response code from the connection.
+     * Gets the cookie for the Authorized connection to the Hub server. Returns the response code from the connection.
      */
     @Override
     public void clientAuthenticate() throws IntegrationException {
@@ -86,9 +84,9 @@ public class CredentialsRestConnection extends RestConnection {
                 response = getClient().newCall(request).execute();
                 logResponseHeaders(response);
                 if (!response.isSuccessful()) {
-                    throw new IntegrationRestException(response.code(), response.message(),
-                            String.format("Connection Error: %s %s", response.code(), response.message()));
-                } else { // get the CSRF token
+                    throw new IntegrationRestException(response.code(), response.message(), String.format("Connection Error: %s %s", response.code(), response.message()));
+                } else {
+                    // get the CSRF token
                     final String csrfToken = response.header(X_CSRF_TOKEN);
                     if (StringUtils.isNotBlank(csrfToken)) {
                         commonRequestHeaders.put(X_CSRF_TOKEN, csrfToken);

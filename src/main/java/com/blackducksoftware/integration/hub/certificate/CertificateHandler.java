@@ -62,22 +62,16 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class CertificateHandler {
-
     public final IntLogger logger;
 
-    private File javaHomeOverride;
-
     public int timeout = 120;
-
     public String proxyHost;
-
     public int proxyPort;
-
     public String proxyNoHosts;
-
     public String proxyUsername;
-
     public String proxyPassword;
+
+    private File javaHomeOverride;
 
     public CertificateHandler(final IntLogger intLogger) {
         logger = intLogger;
