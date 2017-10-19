@@ -61,6 +61,12 @@ public class HubRequest {
         return restConnection.handleExecuteClientCall(request);
     }
 
+    public Response executeGet(final String mediaType) throws IntegrationException {
+        final HttpUrl httpUrl = buildHttpUrl();
+        final Request request = restConnection.createGetRequest(httpUrl, mediaType);
+        return restConnection.handleExecuteClientCall(request);
+    }
+
     public Response executeEncodedFormPost(final Map<String, String> contentMap) throws IntegrationException {
         final HttpUrl httpUrl = buildHttpUrl();
         final Request request = restConnection.createPostRequest(httpUrl, restConnection.createEncodedFormBody(contentMap));
