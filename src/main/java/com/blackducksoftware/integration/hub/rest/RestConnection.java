@@ -284,6 +284,10 @@ public abstract class RestConnection {
         return getRequestBuilder().url(httpUrl).post(body).build();
     }
 
+    public Request createPostRequest(final HttpUrl httpUrl, final Map<String, String> headers, final RequestBody body) {
+        return getRequestBuilder(headers).url(httpUrl).post(body).build();
+    }
+
     public Request createPutRequest(final HttpUrl httpUrl, final RequestBody body) {
         return getRequestBuilder().url(httpUrl).put(body).build();
     }
