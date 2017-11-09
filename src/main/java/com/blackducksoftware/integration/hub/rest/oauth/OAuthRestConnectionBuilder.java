@@ -25,29 +25,27 @@ package com.blackducksoftware.integration.hub.rest.oauth;
 
 import java.net.URL;
 
-import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.proxy.ProxyInfo;
-import com.blackducksoftware.integration.hub.rest.RestConnection;
+import com.blackducksoftware.integration.hub.rest.AbstractRestConnectionBuilder;
 import com.blackducksoftware.integration.log.IntLogger;
 
-public class OAuthRestConnection extends RestConnection {
-    private final TokenManager tokenManager;
-    private final AccessType accessType;
+public class OAuthRestConnectionBuilder extends AbstractRestConnectionBuilder<OAuthRestConnectionBuilder, OAuthRestConnection> {
 
-    public OAuthRestConnection(final IntLogger logger, final URL hubBaseUrl, final int timeout, final TokenManager tokenManager, final AccessType accessType, final ProxyInfo proxyInfo) {
-        super(logger, hubBaseUrl, timeout, proxyInfo);
+    private TokenManager tokenManager;
+    private AccessType accessType;
+
+    public OAuthRestConnectionBuilder applyTokenManager(final TokenManager tokenManager) {
         this.tokenManager = tokenManager;
+        return this;
+    }
+
+    public OAuthRestConnectionBuilder applyTokenManager(final AccessType accessType) {
         this.accessType = accessType;
+        return this;
     }
 
     @Override
-    public void addBuilderAuthentication() throws IntegrationException {
-        builder.authenticator(new OkOauthAuthenticator(tokenManager, accessType, this));
+    public OAuthRestConnection buildConnection(final IntLogger logger, final URL baseURL, final int timeout, final ProxyInfo proxyInfo) {
+        return new OAuthRestConnection(logger, baseURL, timeout, tokenManager, accessType, proxyInfo);
     }
-
-    @Override
-    public void clientAuthenticate() throws IntegrationException {
-        tokenManager.refreshToken(accessType);
-    }
-
 }

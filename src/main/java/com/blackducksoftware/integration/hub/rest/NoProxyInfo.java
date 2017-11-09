@@ -23,23 +23,13 @@
  */
 package com.blackducksoftware.integration.hub.rest;
 
-import java.net.URL;
-
-import com.blackducksoftware.integration.exception.IntegrationException;
+import com.blackducksoftware.integration.hub.Credentials;
 import com.blackducksoftware.integration.hub.proxy.ProxyInfo;
-import com.blackducksoftware.integration.log.IntLogger;
 
-public class UnauthenticatedRestConnection extends RestConnection {
-    public UnauthenticatedRestConnection(final IntLogger logger, final URL hubBaseUrl, final int timeout, final ProxyInfo proxyInfo) {
-        super(logger, hubBaseUrl, timeout, proxyInfo);
+public class NoProxyInfo extends ProxyInfo {
+    private static final long serialVersionUID = 8846615660568079025L;
+
+    public NoProxyInfo(final String host, final int port, final Credentials proxyCredentials, final String ignoredProxyHosts) {
+        super(host, port, proxyCredentials, ignoredProxyHosts);
     }
-
-    @Override
-    public void addBuilderAuthentication() throws IntegrationException {
-    }
-
-    @Override
-    public void clientAuthenticate() throws IntegrationException {
-    }
-
 }

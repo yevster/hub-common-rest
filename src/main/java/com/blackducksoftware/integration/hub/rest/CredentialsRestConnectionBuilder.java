@@ -21,33 +21,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.blackducksoftware.integration.hub.rest.oauth;
+package com.blackducksoftware.integration.hub.rest;
 
 import java.net.URL;
 
-import com.blackducksoftware.integration.exception.IntegrationException;
+import com.blackducksoftware.integration.exception.EncryptionException;
+import com.blackducksoftware.integration.hub.Credentials;
 import com.blackducksoftware.integration.hub.proxy.ProxyInfo;
-import com.blackducksoftware.integration.hub.rest.RestConnection;
 import com.blackducksoftware.integration.log.IntLogger;
 
-public class OAuthRestConnection extends RestConnection {
-    private final TokenManager tokenManager;
-    private final AccessType accessType;
+public class CredentialsRestConnectionBuilder extends AbstractRestConnectionBuilder<CredentialsRestConnectionBuilder, CredentialsRestConnection> {
+    private Credentials credentials;
 
-    public OAuthRestConnection(final IntLogger logger, final URL hubBaseUrl, final int timeout, final TokenManager tokenManager, final AccessType accessType, final ProxyInfo proxyInfo) {
-        super(logger, hubBaseUrl, timeout, proxyInfo);
-        this.tokenManager = tokenManager;
-        this.accessType = accessType;
+    public CredentialsRestConnectionBuilder applyCredentials(final Credentials credentials) {
+        this.credentials = credentials;
+        return this;
     }
 
     @Override
-    public void addBuilderAuthentication() throws IntegrationException {
-        builder.authenticator(new OkOauthAuthenticator(tokenManager, accessType, this));
-    }
-
-    @Override
-    public void clientAuthenticate() throws IntegrationException {
-        tokenManager.refreshToken(accessType);
+    public CredentialsRestConnection buildConnection(final IntLogger logger, final URL baseURL, final int timeout, final ProxyInfo proxyInfo) {
+        try {
+            return new CredentialsRestConnection(logger, baseURL, credentials.getUsername(), credentials.getDecryptedPassword(), timeout, proxyInfo);
+        } catch (final EncryptionException ex) {
+            throw new IllegalStateException(ex);
+        }
     }
 
 }

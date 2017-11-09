@@ -21,33 +21,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.blackducksoftware.integration.hub.rest.oauth;
+package com.blackducksoftware.integration.hub.rest;
 
 import java.net.URL;
 
-import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.proxy.ProxyInfo;
-import com.blackducksoftware.integration.hub.rest.RestConnection;
 import com.blackducksoftware.integration.log.IntLogger;
 
-public class OAuthRestConnection extends RestConnection {
-    private final TokenManager tokenManager;
-    private final AccessType accessType;
-
-    public OAuthRestConnection(final IntLogger logger, final URL hubBaseUrl, final int timeout, final TokenManager tokenManager, final AccessType accessType, final ProxyInfo proxyInfo) {
-        super(logger, hubBaseUrl, timeout, proxyInfo);
-        this.tokenManager = tokenManager;
-        this.accessType = accessType;
-    }
+public class UnauthenticatedRestConnectionBuilder extends AbstractRestConnectionBuilder<UnauthenticatedRestConnectionBuilder, UnauthenticatedRestConnection> {
 
     @Override
-    public void addBuilderAuthentication() throws IntegrationException {
-        builder.authenticator(new OkOauthAuthenticator(tokenManager, accessType, this));
+    public UnauthenticatedRestConnection buildConnection(final IntLogger logger, final URL baseURL, final int timeout, final ProxyInfo proxyInfo) {
+        return new UnauthenticatedRestConnection(logger, baseURL, timeout, proxyInfo);
     }
-
-    @Override
-    public void clientAuthenticate() throws IntegrationException {
-        tokenManager.refreshToken(accessType);
-    }
-
 }

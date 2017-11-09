@@ -53,8 +53,10 @@ import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.blackducksoftware.integration.exception.EncryptionException;
 import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.certificate.CertTrustManager;
+import com.blackducksoftware.integration.hub.proxy.ProxyInfo;
 import com.blackducksoftware.integration.hub.rest.exception.IntegrationRestException;
 import com.blackducksoftware.integration.log.IntLogger;
 import com.blackducksoftware.integration.log.LogLevel;
@@ -84,11 +86,7 @@ public abstract class RestConnection {
     public final Map<String, String> commonRequestHeaders = new HashMap<>();
     public final URL hubBaseUrl;
     public int timeout = 120;
-    public String proxyHost;
-    public int proxyPort;
-    public String proxyNoHosts;
-    public String proxyUsername;
-    public String proxyPassword;
+    private final ProxyInfo proxyInfo;
     public boolean alwaysTrustServerCertificate;
     public IntLogger logger;
 
@@ -106,10 +104,11 @@ public abstract class RestConnection {
         return sdf.format(date);
     }
 
-    public RestConnection(final IntLogger logger, final URL hubBaseUrl, final int timeout) {
+    public RestConnection(final IntLogger logger, final URL hubBaseUrl, final int timeout, final ProxyInfo proxyInfo) {
         this.logger = logger;
         this.hubBaseUrl = hubBaseUrl;
         this.timeout = timeout;
+        this.proxyInfo = proxyInfo;
     }
 
     public void connect() throws IntegrationException {
@@ -182,23 +181,27 @@ public abstract class RestConnection {
         builder.readTimeout(timeout, TimeUnit.SECONDS);
     }
 
-    private void addBuilderProxyInformation() {
+    private void addBuilderProxyInformation() throws IntegrationException {
         if (shouldUseProxyForUrl(hubBaseUrl)) {
             builder.proxy(getProxy(hubBaseUrl));
-            builder.proxyAuthenticator(new com.blackducksoftware.integration.hub.proxy.OkAuthenticator(proxyUsername, proxyPassword));
+            try {
+                builder.proxyAuthenticator(new com.blackducksoftware.integration.hub.proxy.OkAuthenticator(this.proxyInfo.getUsername(), this.proxyInfo.getDecryptedPassword()));
+            } catch (IllegalArgumentException | EncryptionException ex) {
+                throw new IntegrationException(ex);
+            }
         }
     }
 
     private Proxy getProxy(final URL hubUrl) {
-        final Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
+        final Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(this.proxyInfo.getHost(), this.proxyInfo.getPort()));
         return proxy;
     }
 
     private boolean shouldUseProxyForUrl(final URL url) {
-        if (StringUtils.isBlank(proxyHost) || proxyPort <= 0) {
+        if (StringUtils.isBlank(this.proxyInfo.getHost()) || this.proxyInfo.getPort() <= 0) {
             return false;
         }
-        final List<Pattern> ignoredProxyHostPatterns = ProxyUtil.getIgnoredProxyHostPatterns(proxyNoHosts);
+        final List<Pattern> ignoredProxyHostPatterns = ProxyUtil.getIgnoredProxyHostPatterns(this.proxyInfo.getIgnoredProxyHosts());
         return !ProxyUtil.shouldIgnoreHost(url.getHost(), ignoredProxyHostPatterns);
     }
 
