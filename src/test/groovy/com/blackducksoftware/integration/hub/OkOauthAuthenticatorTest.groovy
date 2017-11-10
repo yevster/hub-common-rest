@@ -32,7 +32,7 @@ import org.junit.Test
 import com.blackducksoftware.integration.hub.api.oauth.OAuthConfiguration
 import com.blackducksoftware.integration.hub.proxy.ProxyInfo
 import com.blackducksoftware.integration.hub.rest.RestConnection
-import com.blackducksoftware.integration.hub.rest.UnauthenticatedRestConnection
+import com.blackducksoftware.integration.hub.rest.UnauthenticatedRestConnectionBuilder
 import com.blackducksoftware.integration.hub.rest.oauth.AccessType
 import com.blackducksoftware.integration.hub.rest.oauth.OkOauthAuthenticator
 import com.blackducksoftware.integration.hub.rest.oauth.TokenManager
@@ -104,7 +104,12 @@ class OkOauthAuthenticatorTest {
                     }
                 };
         server.setDispatcher(dispatcher);
-        new UnauthenticatedRestConnection(new PrintStreamIntLogger(System.out, LogLevel.TRACE), server.url("/").url(), CONNECTION_TIMEOUT, ProxyInfo.NO_PROXY_INFO)
+        UnauthenticatedRestConnectionBuilder builder = new UnauthenticatedRestConnectionBuilder()
+        builder.logger = new PrintStreamIntLogger(System.out, LogLevel.TRACE)
+        builder.baseUrl = server.url("/").url()
+        builder.timeout = CONNECTION_TIMEOUT
+        builder.applyProxyInfo(ProxyInfo.NO_PROXY_INFO)
+        builder.build()
     }
 
     private TokenManager getTokenManager(){

@@ -28,9 +28,10 @@ import org.junit.Before
 import org.junit.Test
 
 import com.blackducksoftware.integration.hub.proxy.ProxyInfo
-import com.blackducksoftware.integration.hub.rest.CredentialsRestConnection
+import com.blackducksoftware.integration.hub.proxy.ProxyInfoBuilder
+import com.blackducksoftware.integration.hub.rest.CredentialsRestConnectionBuilder
 import com.blackducksoftware.integration.hub.rest.RestConnection
-import com.blackducksoftware.integration.hub.rest.UnauthenticatedRestConnection
+import com.blackducksoftware.integration.hub.rest.UnauthenticatedRestConnectionBuilder
 import com.blackducksoftware.integration.hub.rest.exception.IntegrationRestException
 import com.blackducksoftware.integration.log.IntLogger
 import com.blackducksoftware.integration.log.LogLevel
@@ -71,7 +72,14 @@ class RestConnectionTest {
                     }
                 };
         server.setDispatcher(dispatcher);
-        new CredentialsRestConnection(new PrintStreamIntLogger(System.out, LogLevel.TRACE), server.url("/").url(), 'TestUser', 'Password', CONNECTION_TIMEOUT, ProxyInfo.NO_PROXY_INFO)
+        CredentialsRestConnectionBuilder builder = new CredentialsRestConnectionBuilder();
+        builder.logger = new PrintStreamIntLogger(System.out, LogLevel.TRACE);
+        builder.baseUrl = server.url("/")
+        builder.timeout = CONNECTION_TIMEOUT
+        builder.username = 'TestUser'
+        builder.password = 'Password'
+        builder.applyProxyInfo(ProxyInfo.NO_PROXY_INFO);
+        builder.build()
     }
 
     @Test
@@ -79,7 +87,12 @@ class RestConnectionTest {
         IntLogger logger = new PrintStreamIntLogger(System.out, LogLevel.INFO)
         int timeoutSeconds = 213
         int timeoutMilliSeconds = timeoutSeconds * 1000
-        RestConnection restConnection = new UnauthenticatedRestConnection(logger, server.url("/").url(), timeoutSeconds, ProxyInfo.NO_PROXY_INFO)
+        UnauthenticatedRestConnectionBuilder builder = new UnauthenticatedRestConnectionBuilder()
+        builder.logger = logger
+        builder.baseUrl = server.url("/").url()
+        builder.timeout = timeoutSeconds
+        builder.applyProxyInfo(ProxyInfo.NO_PROXY_INFO)
+        RestConnection restConnection = builder.build()
         OkHttpClient realClient = restConnection.client
         assert null == realClient
         restConnection.connect()
@@ -95,20 +108,39 @@ class RestConnectionTest {
         String proxyIgnoredHosts = "IgnoredHost"
         String proxyUser = "testUser"
         String proxyPassword = "password"
-        Credentials proxyCredentials = new Credentials(proxyUser,proxyPassword)
-        ProxyInfo proxyInfo = new ProxyInfo(proxyHost, proxyPort, proxyCredentials, proxyIgnoredHosts)
-        restConnection = new UnauthenticatedRestConnection(logger, server.url("/").url(), timeoutSeconds, proxyInfo)
+        ProxyInfoBuilder proxyBuilder = new ProxyInfoBuilder()
+        proxyBuilder.host = proxyHost
+        proxyBuilder.port = proxyPort
+        proxyBuilder.username = proxyUser
+        proxyBuilder.password = proxyPassword
+        proxyBuilder.ignoredProxyHosts = proxyIgnoredHosts
+        ProxyInfo proxyInfo = proxyBuilder.build()
+        builder = new UnauthenticatedRestConnectionBuilder()
+        builder.logger = logger
+        builder.baseUrl = server.url("/").url()
+        builder.timeout = timeoutSeconds
+        builder.applyProxyInfo(proxyInfo)
+        restConnection = builder.build()
 
         restConnection.connect()
         realClient = restConnection.client
         assert null != realClient.proxy
         assert okhttp3.Authenticator.NONE != realClient.proxyAuthenticator
 
-        restConnection = new UnauthenticatedRestConnection(logger, server.url("/").url(), timeoutSeconds, ProxyInfo.NO_PROXY_INFO)
         proxyIgnoredHosts = ".*"
-        proxyCredentials = new Credentials(proxyUser,proxyPassword)
-        proxyInfo = new ProxyInfo(proxyHost, proxyPort, proxyCredentials, proxyIgnoredHosts)
-        restConnection = new UnauthenticatedRestConnection(logger, server.url("/").url(), timeoutSeconds, proxyInfo)
+        proxyBuilder = new ProxyInfoBuilder()
+        proxyBuilder.host = proxyHost
+        proxyBuilder.port = proxyPort
+        proxyBuilder.username = proxyUser
+        proxyBuilder.password = proxyPassword
+        proxyBuilder.ignoredProxyHosts = proxyIgnoredHosts
+        proxyInfo = proxyBuilder.build()
+        builder = new UnauthenticatedRestConnectionBuilder()
+        builder.logger = logger
+        builder.baseUrl = server.url("/").url()
+        builder.timeout = timeoutSeconds
+        builder.applyProxyInfo(proxyInfo)
+        restConnection = builder.build()
 
         restConnection.connect()
         realClient = restConnection.client

@@ -60,6 +60,7 @@ public class ProxyInfo implements Serializable {
     }
 
     public Proxy getProxy(final URL url) {
+        // TODO: Change rest connection to use this method
         if (shouldUseProxyForUrl(url)) {
             final Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(host, port));
             return proxy;

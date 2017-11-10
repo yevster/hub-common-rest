@@ -28,7 +28,7 @@ import org.junit.Before
 import org.junit.Test
 
 import com.blackducksoftware.integration.hub.proxy.ProxyInfo
-import com.blackducksoftware.integration.hub.rest.CredentialsRestConnection
+import com.blackducksoftware.integration.hub.rest.CredentialsRestConnectionBuilder
 import com.blackducksoftware.integration.hub.rest.RestConnection
 import com.blackducksoftware.integration.hub.rest.exception.IntegrationRestException
 import com.blackducksoftware.integration.log.LogLevel
@@ -62,7 +62,14 @@ class CredentialsRestConnectionTest {
                     }
                 };
         server.setDispatcher(dispatcher);
-        new CredentialsRestConnection(new PrintStreamIntLogger(System.out, LogLevel.TRACE), server.url("/").url(), 'TestUser', 'Password', CONNECTION_TIMEOUT, ProxyInfo.NO_PROXY_INFO)
+        CredentialsRestConnectionBuilder builder = new CredentialsRestConnectionBuilder();
+        builder.logger = new PrintStreamIntLogger(System.out, LogLevel.TRACE);
+        builder.baseUrl = server.url("/")
+        builder.timeout = CONNECTION_TIMEOUT
+        builder.username = 'TestUser'
+        builder.password = 'Password'
+        builder.applyProxyInfo(ProxyInfo.NO_PROXY_INFO);
+        builder.build()
     }
 
     private MockResponse getSuccessResponse(){

@@ -80,7 +80,7 @@ public abstract class AbstractRestConnectionBuilder<C extends RestConnection> ex
             setProxyPort(proxyInfo.getPort());
             setProxyUsername(proxyInfo.getUsername());
             setProxyPassword(proxyInfo.getDecryptedPassword());
-            setProxyIgnoreHosts(proxyIgnoreHosts);
+            setProxyIgnoreHosts(proxyInfo.getIgnoredProxyHosts());
         } catch (IllegalArgumentException | EncryptionException ex) {
             throw new IllegalArgumentException(ex);
         }

@@ -32,7 +32,7 @@ import com.blackducksoftware.integration.hub.request.HubPagedRequest
 import com.blackducksoftware.integration.hub.request.HubRequest
 import com.blackducksoftware.integration.hub.request.HubRequestFactory
 import com.blackducksoftware.integration.hub.rest.RestConnection
-import com.blackducksoftware.integration.hub.rest.UnauthenticatedRestConnection
+import com.blackducksoftware.integration.hub.rest.UnauthenticatedRestConnectionBuilder
 import com.blackducksoftware.integration.hub.rest.exception.IntegrationRestException
 import com.blackducksoftware.integration.log.LogLevel
 import com.blackducksoftware.integration.log.PrintStreamIntLogger
@@ -69,7 +69,12 @@ class HubRequestExecutionTest {
                     };
             server.setDispatcher(dispatcher);
         }
-        new UnauthenticatedRestConnection(new PrintStreamIntLogger(System.out, LogLevel.TRACE), server.url("/").url(), CONNECTION_TIMEOUT,ProxyInfo.NO_PROXY_INFO)
+        UnauthenticatedRestConnectionBuilder builder = new UnauthenticatedRestConnectionBuilder()
+        builder.logger = new PrintStreamIntLogger(System.out, LogLevel.TRACE)
+        builder.baseUrl = server.url("/").url()
+        builder.timeout = CONNECTION_TIMEOUT
+        builder.applyProxyInfo(ProxyInfo.NO_PROXY_INFO)
+        builder.build()
     }
 
     @Test
