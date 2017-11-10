@@ -28,6 +28,7 @@ import org.junit.Before
 import org.junit.Test
 
 import com.blackducksoftware.integration.hub.api.oauth.Token
+import com.blackducksoftware.integration.hub.proxy.ProxyInfo
 import com.blackducksoftware.integration.hub.rest.RestConnection
 import com.blackducksoftware.integration.hub.rest.UnauthenticatedRestConnection
 import com.blackducksoftware.integration.hub.rest.exception.IntegrationRestException
@@ -93,7 +94,7 @@ class HubOAuthTokenServiceTest {
                 };
         server.setDispatcher(dispatcher);
 
-        new UnauthenticatedRestConnection(new PrintStreamIntLogger(System.out, LogLevel.TRACE),server.url("/").url(), CONNECTION_TIMEOUT)
+        new UnauthenticatedRestConnection(new PrintStreamIntLogger(System.out, LogLevel.TRACE),server.url("/").url(), CONNECTION_TIMEOUT, ProxyInfo.NO_PROXY_INFO)
     }
 
     @Test

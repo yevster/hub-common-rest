@@ -28,6 +28,7 @@ import org.junit.Before
 import org.junit.Test
 
 import com.blackducksoftware.integration.hub.api.oauth.OAuthConfiguration
+import com.blackducksoftware.integration.hub.proxy.ProxyInfo
 import com.blackducksoftware.integration.hub.rest.RestConnection
 import com.blackducksoftware.integration.hub.rest.oauth.AccessType
 import com.blackducksoftware.integration.hub.rest.oauth.OAuthRestConnection
@@ -116,7 +117,7 @@ class OAuthRestConnectionTest {
     }
 
     private RestConnection getRestConnection(TokenManager tokenManager, AccessType accessType){
-        new OAuthRestConnection(new PrintStreamIntLogger(System.out, LogLevel.TRACE), server.url("/").url(), CONNECTION_TIMEOUT, tokenManager, accessType)
+        new OAuthRestConnection(new PrintStreamIntLogger(System.out, LogLevel.TRACE), server.url("/").url(), CONNECTION_TIMEOUT, tokenManager, accessType, ProxyInfo.NO_PROXY_INFO)
     }
 
 

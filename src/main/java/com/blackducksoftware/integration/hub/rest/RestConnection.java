@@ -198,6 +198,9 @@ public abstract class RestConnection {
     }
 
     private boolean shouldUseProxyForUrl(final URL url) {
+        if (ProxyInfo.NO_PROXY_INFO.equals(this.proxyInfo)) {
+            return false;
+        }
         if (StringUtils.isBlank(this.proxyInfo.getHost()) || this.proxyInfo.getPort() <= 0) {
             return false;
         }

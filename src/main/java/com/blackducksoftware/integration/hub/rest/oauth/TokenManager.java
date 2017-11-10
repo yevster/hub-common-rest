@@ -24,13 +24,13 @@
 package com.blackducksoftware.integration.hub.rest.oauth;
 
 import java.net.MalformedURLException;
-import java.net.URL;
 
 import org.apache.commons.lang3.StringUtils;
 
 import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.api.oauth.OAuthConfiguration;
 import com.blackducksoftware.integration.hub.api.oauth.Token;
+import com.blackducksoftware.integration.hub.proxy.ProxyInfo;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
 import com.blackducksoftware.integration.hub.rest.UnauthenticatedRestConnectionBuilder;
 import com.blackducksoftware.integration.hub.service.HubOAuthTokenService;
@@ -43,10 +43,12 @@ public class TokenManager {
     private final int timeout;
     private OAuthConfiguration configuration;
     private Token clientToken;
+    private ProxyInfo proxyInfo;
 
     public TokenManager(final IntLogger logger, final int timeout) {
         this.logger = logger;
         this.timeout = timeout;
+        this.proxyInfo = ProxyInfo.NO_PROXY_INFO; // initially assume no proxy
     }
 
     public IntLogger getLogger() {
@@ -63,6 +65,14 @@ public class TokenManager {
 
     public void setConfiguration(final OAuthConfiguration configuration) {
         this.configuration = configuration;
+    }
+
+    public ProxyInfo getProxyInfo() {
+        return proxyInfo;
+    }
+
+    public void setProxyInfo(final ProxyInfo proxyInfo) {
+        this.proxyInfo = proxyInfo;
     }
 
     public String createTokenCredential(final String token) {
@@ -141,9 +151,12 @@ public class TokenManager {
     }
 
     private RestConnection createConnection() throws MalformedURLException {
-        final URL url = new URL(configuration.tokenUri);
-        UnauthenticatedRestConnectionBuilder connectionBuilder = new UnauthenticatedRestConnectionBuilder();
-        connectionBuilder = connectionBuilder.applyBaseUrl(url);
+        final UnauthenticatedRestConnectionBuilder connectionBuilder = new UnauthenticatedRestConnectionBuilder();
+        connectionBuilder.setBaseUrl(configuration.tokenUri);
+        connectionBuilder.setTimeout(timeout);
+        connectionBuilder.setLogger(getLogger());
+        connectionBuilder.applyProxyInfo(proxyInfo);
+
         final RestConnection connection = connectionBuilder.build();
         return connection;
     }

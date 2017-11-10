@@ -23,29 +23,51 @@
  */
 package com.blackducksoftware.integration.hub.rest.oauth;
 
-import java.net.URL;
-
 import com.blackducksoftware.integration.hub.proxy.ProxyInfo;
 import com.blackducksoftware.integration.hub.rest.AbstractRestConnectionBuilder;
-import com.blackducksoftware.integration.log.IntLogger;
+import com.blackducksoftware.integration.hub.validator.OauthRestConnectionValidator;
+import com.blackducksoftware.integration.validator.AbstractValidator;
 
-public class OAuthRestConnectionBuilder extends AbstractRestConnectionBuilder<OAuthRestConnectionBuilder, OAuthRestConnection> {
+public class OAuthRestConnectionBuilder extends AbstractRestConnectionBuilder<OAuthRestConnection> {
 
     private TokenManager tokenManager;
     private AccessType accessType;
 
-    public OAuthRestConnectionBuilder applyTokenManager(final TokenManager tokenManager) {
-        this.tokenManager = tokenManager;
-        return this;
+    public TokenManager getTokenManager() {
+        return tokenManager;
     }
 
-    public OAuthRestConnectionBuilder applyTokenManager(final AccessType accessType) {
+    public AccessType getAccessType() {
+        return accessType;
+    }
+
+    public void setTokenManager(final TokenManager tokenManager) {
+        this.tokenManager = tokenManager;
+    }
+
+    public void setTokenManager(final AccessType accessType) {
         this.accessType = accessType;
-        return this;
     }
 
     @Override
-    public OAuthRestConnection buildConnection(final IntLogger logger, final URL baseURL, final int timeout, final ProxyInfo proxyInfo) {
-        return new OAuthRestConnection(logger, baseURL, timeout, tokenManager, accessType, proxyInfo);
+    public AbstractValidator createValidator() {
+        final OauthRestConnectionValidator validator = new OauthRestConnectionValidator();
+        validator.setBaseUrl(getBaseUrl());
+        validator.setTimeout(getTimeout());
+        validator.setProxyHost(getProxyHost());
+        validator.setProxyPort(getProxyPort());
+        validator.setProxyUsername(getProxyUsername());
+        validator.setProxyPassword(getProxyPassword());
+        validator.setProxyIgnoreHosts(getProxyIgnoreHosts());
+        validator.setLogger(getLogger());
+        validator.setCommonRequestHeaders(getCommonRequestHeaders());
+        validator.setAccessType(getAccessType());
+        validator.setTokenManager(getTokenManager());
+        return validator;
+    }
+
+    @Override
+    public OAuthRestConnection createConnection(final ProxyInfo proxyInfo) {
+        return new OAuthRestConnection(getLogger(), getBaseConnectionUrl(), getTimeout(), tokenManager, accessType, proxyInfo);
     }
 }

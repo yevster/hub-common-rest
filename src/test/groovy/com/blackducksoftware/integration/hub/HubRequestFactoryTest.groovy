@@ -25,6 +25,7 @@ package com.blackducksoftware.integration.hub
 
 import org.junit.Test
 
+import com.blackducksoftware.integration.hub.proxy.ProxyInfo
 import com.blackducksoftware.integration.hub.request.HubPagedRequest
 import com.blackducksoftware.integration.hub.request.HubRequest
 import com.blackducksoftware.integration.hub.request.HubRequestFactory
@@ -41,7 +42,7 @@ class HubRequestFactoryTest {
     public static final int CONNECTION_TIMEOUT = 213
 
     private RestConnection getRestConnection(){
-        new UnauthenticatedRestConnection(new PrintStreamIntLogger(System.out, LogLevel.TRACE), GOOGLE_URL, CONNECTION_TIMEOUT)
+        new UnauthenticatedRestConnection(new PrintStreamIntLogger(System.out, LogLevel.TRACE), GOOGLE_URL, CONNECTION_TIMEOUT,ProxyInfo.NO_PROXY_INFO)
     }
 
     @Test

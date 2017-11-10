@@ -23,28 +23,51 @@
  */
 package com.blackducksoftware.integration.hub.rest;
 
-import java.net.URL;
-
-import com.blackducksoftware.integration.exception.EncryptionException;
-import com.blackducksoftware.integration.hub.Credentials;
 import com.blackducksoftware.integration.hub.proxy.ProxyInfo;
-import com.blackducksoftware.integration.log.IntLogger;
+import com.blackducksoftware.integration.hub.validator.CredentialsRestConnectionValidator;
+import com.blackducksoftware.integration.validator.AbstractValidator;
 
-public class CredentialsRestConnectionBuilder extends AbstractRestConnectionBuilder<CredentialsRestConnectionBuilder, CredentialsRestConnection> {
-    private Credentials credentials;
+public class CredentialsRestConnectionBuilder extends AbstractRestConnectionBuilder<CredentialsRestConnection> {
 
-    public CredentialsRestConnectionBuilder applyCredentials(final Credentials credentials) {
-        this.credentials = credentials;
-        return this;
+    private String username;
+    private String password;
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(final String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(final String password) {
+        this.password = password;
     }
 
     @Override
-    public CredentialsRestConnection buildConnection(final IntLogger logger, final URL baseURL, final int timeout, final ProxyInfo proxyInfo) {
-        try {
-            return new CredentialsRestConnection(logger, baseURL, credentials.getUsername(), credentials.getDecryptedPassword(), timeout, proxyInfo);
-        } catch (final EncryptionException ex) {
-            throw new IllegalStateException(ex);
-        }
+    public AbstractValidator createValidator() {
+        final CredentialsRestConnectionValidator validator = new CredentialsRestConnectionValidator();
+        validator.setBaseUrl(getBaseUrl());
+        validator.setTimeout(getTimeout());
+        validator.setUsername(getUsername());
+        validator.setPassword(getPassword());
+        validator.setProxyHost(getProxyHost());
+        validator.setProxyPort(getProxyPort());
+        validator.setProxyUsername(getProxyUsername());
+        validator.setProxyPassword(getProxyPassword());
+        validator.setProxyIgnoreHosts(getProxyIgnoreHosts());
+        validator.setLogger(getLogger());
+        validator.setCommonRequestHeaders(getCommonRequestHeaders());
+        return validator;
     }
 
+    @Override
+    public CredentialsRestConnection createConnection(final ProxyInfo proxyInfo) {
+        final CredentialsRestConnection connection = new CredentialsRestConnection(getLogger(), getBaseConnectionUrl(), getUsername(), getPassword(), getTimeout(), proxyInfo);
+        return connection;
+    }
 }

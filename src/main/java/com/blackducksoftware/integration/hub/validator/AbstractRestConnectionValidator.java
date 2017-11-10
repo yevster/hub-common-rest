@@ -21,20 +21,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.blackducksoftware.integration.hub.rest;
+package com.blackducksoftware.integration.hub.validator;
 
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.blackducksoftware.integration.builder.AbstractBuilder;
-import com.blackducksoftware.integration.exception.EncryptionException;
-import com.blackducksoftware.integration.hub.proxy.ProxyInfo;
-import com.blackducksoftware.integration.hub.proxy.ProxyInfoBuilder;
+import com.blackducksoftware.integration.hub.rest.RestConnectionFieldEnum;
 import com.blackducksoftware.integration.log.IntLogger;
+import com.blackducksoftware.integration.validator.AbstractValidator;
+import com.blackducksoftware.integration.validator.ValidationResult;
+import com.blackducksoftware.integration.validator.ValidationResultEnum;
+import com.blackducksoftware.integration.validator.ValidationResults;
 
-public abstract class AbstractRestConnectionBuilder<C extends RestConnection> extends AbstractBuilder<C> {
+public abstract class AbstractRestConnectionValidator extends AbstractValidator {
+
+    public static final String ERROR_MSG_URL_NOT_FOUND = "No Hub Url was found.";
+
+    public static final String ERROR_MSG_URL_NOT_VALID_PREFIX = "This is not a valid URL : ";
+
+    public static final String ERROR_MSG_URL_NOT_VALID = "The Hub Url is not a valid URL.";
 
     private String baseUrl;
     private int timeout = 120;
@@ -44,58 +52,66 @@ public abstract class AbstractRestConnectionBuilder<C extends RestConnection> ex
     private String proxyPassword;
     private String proxyIgnoreHosts;
     private IntLogger logger;
-    private boolean alwaysTrustServerCertificate;
     private Map<String, String> commonRequestHeaders = new HashMap<>();
 
     @Override
-    public C buildObject() {
-        final ProxyInfo proxyInfo = getProxyInfo();
-        final C connection = createConnection(proxyInfo);
-        connection.alwaysTrustServerCertificate = alwaysTrustServerCertificate;
-        if (!this.commonRequestHeaders.isEmpty()) {
-            connection.commonRequestHeaders.putAll(this.commonRequestHeaders);
+    public ValidationResults assertValid() {
+        final ValidationResults result = new ValidationResults();
+        validateBaseUrl(result);
+        validateLogger(result);
+        validateCommonRequestHeaders(result);
+        validateProxyInfo(result);
+        validateAdditionalFields(result);
+        return result;
+    }
+
+    public void validateBaseUrl(final ValidationResults result) {
+        if (baseUrl == null) {
+            result.addResult(RestConnectionFieldEnum.URL, new ValidationResult(ValidationResultEnum.ERROR, ERROR_MSG_URL_NOT_FOUND));
+            return;
         }
-        return connection;
-    }
 
-    public abstract C createConnection(ProxyInfo proxyInfo);
-
-    private ProxyInfo getProxyInfo() {
-        final ProxyInfoBuilder builder = new ProxyInfoBuilder();
-        builder.setHost(proxyHost);
-        builder.setPort(proxyPort);
-        builder.setUsername(proxyUsername);
-        builder.setPassword(proxyPassword);
-        builder.setIgnoredProxyHosts(proxyIgnoreHosts);
-        return builder.buildObject();
-    }
-
-    public void applyHeader(final String headerName, final String headerValue) {
-        commonRequestHeaders.put(headerName, headerValue);
-    }
-
-    public void applyProxyInfo(final ProxyInfo proxyInfo) {
+        URL hubURL = null;
         try {
-            setProxyHost(proxyInfo.getHost());
-            setProxyPort(proxyInfo.getPort());
-            setProxyUsername(proxyInfo.getUsername());
-            setProxyPassword(proxyInfo.getDecryptedPassword());
-            setProxyIgnoreHosts(proxyIgnoreHosts);
-        } catch (IllegalArgumentException | EncryptionException ex) {
-            throw new IllegalArgumentException(ex);
+            hubURL = new URL(baseUrl);
+            hubURL.toURI();
+        } catch (final MalformedURLException | URISyntaxException e) {
+            result.addResult(RestConnectionFieldEnum.URL, new ValidationResult(ValidationResultEnum.ERROR, ERROR_MSG_URL_NOT_VALID));
+            return;
         }
     }
 
-    public URL getBaseConnectionUrl() {
-        try {
-            return new URL(baseUrl);
-        } catch (final MalformedURLException e) {
-            return null;
+    public void validateTimeout(final ValidationResults result) {
+        if (timeout <= 0) {
+            result.addResult(RestConnectionFieldEnum.TIMEOUT, new ValidationResult(ValidationResultEnum.ERROR, "The Timeout must be greater than 0."));
         }
     }
+
+    public void validateLogger(final ValidationResults result) {
+        if (logger == null) {
+            result.addResult(RestConnectionFieldEnum.LOGGER, new ValidationResult(ValidationResultEnum.ERROR, "This logger instance cannot be null"));
+        }
+    }
+
+    public void validateCommonRequestHeaders(final ValidationResults result) {
+        if (commonRequestHeaders == null) {
+            result.addResult(RestConnectionFieldEnum.COMMON_HEADERS, new ValidationResult(ValidationResultEnum.ERROR, "The common headers map cannot be null"));
+        }
+    }
+
+    public void validateProxyInfo(final ValidationResults result) {
+        final ProxyInfoValidator validator = new ProxyInfoValidator();
+        validator.setHost(proxyHost);
+        validator.setPort(proxyPort);
+        validator.setUsername(proxyUsername);
+        validator.setPassword(proxyPassword);
+        validator.setIgnoredProxyHosts(proxyIgnoreHosts);
+    }
+
+    public abstract void validateAdditionalFields(ValidationResults currentResults);
 
     public String getBaseUrl() {
-        return baseUrl;
+        return this.baseUrl;
     }
 
     public void setBaseUrl(final String baseUrl) {
@@ -158,14 +174,6 @@ public abstract class AbstractRestConnectionBuilder<C extends RestConnection> ex
         this.logger = logger;
     }
 
-    public boolean isAlwaysTrustServerCertificate() {
-        return alwaysTrustServerCertificate;
-    }
-
-    public void setAlwaysTrustServerCertificate(final boolean alwaysTrustServerCertificate) {
-        this.alwaysTrustServerCertificate = alwaysTrustServerCertificate;
-    }
-
     public Map<String, String> getCommonRequestHeaders() {
         return commonRequestHeaders;
     }
@@ -173,4 +181,5 @@ public abstract class AbstractRestConnectionBuilder<C extends RestConnection> ex
     public void setCommonRequestHeaders(final Map<String, String> commonRequestHeaders) {
         this.commonRequestHeaders = commonRequestHeaders;
     }
+
 }

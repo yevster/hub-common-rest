@@ -27,6 +27,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
+import com.blackducksoftware.integration.hub.proxy.ProxyInfo
 import com.blackducksoftware.integration.hub.rest.CredentialsRestConnection
 import com.blackducksoftware.integration.hub.rest.RestConnection
 import com.blackducksoftware.integration.hub.rest.UnauthenticatedRestConnection
@@ -70,7 +71,7 @@ class RestConnectionTest {
                     }
                 };
         server.setDispatcher(dispatcher);
-        new CredentialsRestConnection(new PrintStreamIntLogger(System.out, LogLevel.TRACE), server.url("/").url(), 'TestUser', 'Password', CONNECTION_TIMEOUT)
+        new CredentialsRestConnection(new PrintStreamIntLogger(System.out, LogLevel.TRACE), server.url("/").url(), 'TestUser', 'Password', CONNECTION_TIMEOUT, ProxyInfo.NO_PROXY_INFO)
     }
 
     @Test
@@ -78,7 +79,7 @@ class RestConnectionTest {
         IntLogger logger = new PrintStreamIntLogger(System.out, LogLevel.INFO)
         int timeoutSeconds = 213
         int timeoutMilliSeconds = timeoutSeconds * 1000
-        RestConnection restConnection = new UnauthenticatedRestConnection(logger, server.url("/").url(), timeoutSeconds)
+        RestConnection restConnection = new UnauthenticatedRestConnection(logger, server.url("/").url(), timeoutSeconds, ProxyInfo.NO_PROXY_INFO)
         OkHttpClient realClient = restConnection.client
         assert null == realClient
         restConnection.connect()
@@ -89,31 +90,25 @@ class RestConnectionTest {
         assert null == realClient.proxy
         assert okhttp3.Authenticator.NONE == realClient.proxyAuthenticator
 
-        restConnection = new UnauthenticatedRestConnection(logger, server.url("/").url(), timeoutSeconds)
         String proxyHost = "ProxyHost"
         int proxyPort = 3128
         String proxyIgnoredHosts = "IgnoredHost"
         String proxyUser = "testUser"
         String proxyPassword = "password"
-
-        restConnection.proxyHost = proxyHost
-        restConnection.proxyPort = proxyPort
-        restConnection.proxyNoHosts = proxyIgnoredHosts
-        restConnection.proxyUsername = proxyUser
-        restConnection.proxyPassword = proxyPassword
+        Credentials proxyCredentials = new Credentials(proxyUser,proxyPassword)
+        ProxyInfo proxyInfo = new ProxyInfo(proxyHost, proxyPort, proxyCredentials, proxyIgnoredHosts)
+        restConnection = new UnauthenticatedRestConnection(logger, server.url("/").url(), timeoutSeconds, proxyInfo)
 
         restConnection.connect()
         realClient = restConnection.client
         assert null != realClient.proxy
         assert okhttp3.Authenticator.NONE != realClient.proxyAuthenticator
 
-        restConnection = new UnauthenticatedRestConnection(logger, server.url("/").url(), timeoutSeconds)
+        restConnection = new UnauthenticatedRestConnection(logger, server.url("/").url(), timeoutSeconds, ProxyInfo.NO_PROXY_INFO)
         proxyIgnoredHosts = ".*"
-        restConnection.proxyHost = proxyHost
-        restConnection.proxyPort = proxyPort
-        restConnection.proxyNoHosts = proxyIgnoredHosts
-        restConnection.proxyUsername = proxyUser
-        restConnection.proxyPassword = proxyPassword
+        proxyCredentials = new Credentials(proxyUser,proxyPassword)
+        proxyInfo = new ProxyInfo(proxyHost, proxyPort, proxyCredentials, proxyIgnoredHosts)
+        restConnection = new UnauthenticatedRestConnection(logger, server.url("/").url(), timeoutSeconds, proxyInfo)
 
         restConnection.connect()
         realClient = restConnection.client

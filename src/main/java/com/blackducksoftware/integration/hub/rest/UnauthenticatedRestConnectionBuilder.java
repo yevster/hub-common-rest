@@ -23,15 +23,29 @@
  */
 package com.blackducksoftware.integration.hub.rest;
 
-import java.net.URL;
-
 import com.blackducksoftware.integration.hub.proxy.ProxyInfo;
-import com.blackducksoftware.integration.log.IntLogger;
+import com.blackducksoftware.integration.hub.validator.UnauthenticatedRestConnectionValidator;
+import com.blackducksoftware.integration.validator.AbstractValidator;
 
-public class UnauthenticatedRestConnectionBuilder extends AbstractRestConnectionBuilder<UnauthenticatedRestConnectionBuilder, UnauthenticatedRestConnection> {
+public class UnauthenticatedRestConnectionBuilder extends AbstractRestConnectionBuilder<UnauthenticatedRestConnection> {
 
     @Override
-    public UnauthenticatedRestConnection buildConnection(final IntLogger logger, final URL baseURL, final int timeout, final ProxyInfo proxyInfo) {
-        return new UnauthenticatedRestConnection(logger, baseURL, timeout, proxyInfo);
+    public AbstractValidator createValidator() {
+        final UnauthenticatedRestConnectionValidator validator = new UnauthenticatedRestConnectionValidator();
+        validator.setBaseUrl(getBaseUrl());
+        validator.setTimeout(getTimeout());
+        validator.setProxyHost(getProxyHost());
+        validator.setProxyPort(getProxyPort());
+        validator.setProxyUsername(getProxyUsername());
+        validator.setProxyPassword(getProxyPassword());
+        validator.setProxyIgnoreHosts(getProxyIgnoreHosts());
+        validator.setLogger(getLogger());
+        validator.setCommonRequestHeaders(getCommonRequestHeaders());
+        return validator;
+    }
+
+    @Override
+    public UnauthenticatedRestConnection createConnection(final ProxyInfo proxyInfo) {
+        return new UnauthenticatedRestConnection(getLogger(), getBaseConnectionUrl(), getTimeout(), proxyInfo);
     }
 }

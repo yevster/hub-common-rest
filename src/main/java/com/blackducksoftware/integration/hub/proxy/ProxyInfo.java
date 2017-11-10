@@ -40,6 +40,8 @@ import com.blackducksoftware.integration.util.proxy.ProxyUtil;
 
 public class ProxyInfo implements Serializable {
     private static final long serialVersionUID = -7476704373593358472L;
+    public final static ProxyInfo NO_PROXY_INFO = new NoProxyInfo();
+
     private final String host;
     private final int port;
     private final Credentials proxyCredentials;
@@ -198,5 +200,6 @@ public class ProxyInfo implements Serializable {
 
     private Credentials getProxyCredentials() {
         return proxyCredentials;
-    }
+    };
+
 }

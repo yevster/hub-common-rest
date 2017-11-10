@@ -27,6 +27,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
+import com.blackducksoftware.integration.hub.proxy.ProxyInfo
 import com.blackducksoftware.integration.hub.request.HubPagedRequest
 import com.blackducksoftware.integration.hub.request.HubRequest
 import com.blackducksoftware.integration.hub.request.HubRequestFactory
@@ -68,7 +69,7 @@ class HubRequestExecutionTest {
                     };
             server.setDispatcher(dispatcher);
         }
-        new UnauthenticatedRestConnection(new PrintStreamIntLogger(System.out, LogLevel.TRACE), server.url("/").url(), CONNECTION_TIMEOUT)
+        new UnauthenticatedRestConnection(new PrintStreamIntLogger(System.out, LogLevel.TRACE), server.url("/").url(), CONNECTION_TIMEOUT,ProxyInfo.NO_PROXY_INFO)
     }
 
     @Test

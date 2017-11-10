@@ -30,6 +30,7 @@ import org.junit.Test
 import com.blackducksoftware.integration.exception.IntegrationException
 import com.blackducksoftware.integration.hub.api.oauth.OAuthConfiguration
 import com.blackducksoftware.integration.hub.api.oauth.Token
+import com.blackducksoftware.integration.hub.proxy.ProxyInfo
 import com.blackducksoftware.integration.hub.rest.exception.IntegrationRestException
 import com.blackducksoftware.integration.hub.rest.oauth.AccessType
 import com.blackducksoftware.integration.hub.rest.oauth.TokenManager
@@ -109,6 +110,7 @@ class TokenManagerTest {
         oAuthConfig.refreshToken = refreshToken
 
         TokenManager tokenManager = new TokenManager(new PrintStreamIntLogger(System.out, LogLevel.TRACE), CONNECTION_TIMEOUT)
+        tokenManager.setProxyInfo(ProxyInfo.NO_PROXY_INFO);
         tokenManager.setConfiguration(oAuthConfig)
         tokenManager
     }
