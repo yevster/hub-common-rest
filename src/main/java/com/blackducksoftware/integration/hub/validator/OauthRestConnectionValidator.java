@@ -32,6 +32,8 @@ import com.blackducksoftware.integration.validator.ValidationResults;
 
 public class OauthRestConnectionValidator extends AbstractRestConnectionValidator {
 
+    public static final String ERROR_MSG_ACCESS_TYPE_NULL = "The access type cannot be null";
+    public static final String ERROR_MSG_TOKEN_MANAGER_NULL = "The Token Manager cannot be null";
     private TokenManager tokenManager;
     private AccessType accessType;
 
@@ -57,15 +59,15 @@ public class OauthRestConnectionValidator extends AbstractRestConnectionValidato
         validateTokenManager(currentResults);
     }
 
-    private void validateAccessType(final ValidationResults result) {
+    public void validateAccessType(final ValidationResults result) {
         if (accessType == null) {
-            result.addResult(OauthRestConnectionFieldEnum.ACCESSTYPE, new ValidationResult(ValidationResultEnum.ERROR, "The access token cannot be null"));
+            result.addResult(OauthRestConnectionFieldEnum.ACCESSTYPE, new ValidationResult(ValidationResultEnum.ERROR, ERROR_MSG_ACCESS_TYPE_NULL));
         }
     }
 
-    private void validateTokenManager(final ValidationResults result) {
+    public void validateTokenManager(final ValidationResults result) {
         if (tokenManager == null) {
-            result.addResult(OauthRestConnectionFieldEnum.TOKENMANAGER, new ValidationResult(ValidationResultEnum.ERROR, "The Token Manager cannot be null"));
+            result.addResult(OauthRestConnectionFieldEnum.TOKENMANAGER, new ValidationResult(ValidationResultEnum.ERROR, ERROR_MSG_TOKEN_MANAGER_NULL));
         }
     }
 }

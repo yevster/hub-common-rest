@@ -38,6 +38,12 @@ import com.blackducksoftware.integration.validator.ValidationResults;
 
 public abstract class AbstractRestConnectionValidator extends AbstractValidator {
 
+    public static final String ERROR_MSG_TIMEOUT_NOT_VALID = "The Timeout must be greater than 0.";
+
+    public static final String ERROR_MSG_COMMON_HEADERS_NOT_VALID = "The common headers map cannot be null";
+
+    public static final String ERROR_MSG_LOGGER_NOT_VALID = "This logger instance cannot be null";
+
     public static final String ERROR_MSG_URL_NOT_FOUND = "No Hub Url was found.";
 
     public static final String ERROR_MSG_URL_NOT_VALID_PREFIX = "This is not a valid URL : ";
@@ -83,19 +89,19 @@ public abstract class AbstractRestConnectionValidator extends AbstractValidator 
 
     public void validateTimeout(final ValidationResults result) {
         if (timeout <= 0) {
-            result.addResult(RestConnectionFieldEnum.TIMEOUT, new ValidationResult(ValidationResultEnum.ERROR, "The Timeout must be greater than 0."));
+            result.addResult(RestConnectionFieldEnum.TIMEOUT, new ValidationResult(ValidationResultEnum.ERROR, ERROR_MSG_TIMEOUT_NOT_VALID));
         }
     }
 
     public void validateLogger(final ValidationResults result) {
         if (logger == null) {
-            result.addResult(RestConnectionFieldEnum.LOGGER, new ValidationResult(ValidationResultEnum.ERROR, "This logger instance cannot be null"));
+            result.addResult(RestConnectionFieldEnum.LOGGER, new ValidationResult(ValidationResultEnum.ERROR, ERROR_MSG_LOGGER_NOT_VALID));
         }
     }
 
     public void validateCommonRequestHeaders(final ValidationResults result) {
         if (commonRequestHeaders == null) {
-            result.addResult(RestConnectionFieldEnum.COMMON_HEADERS, new ValidationResult(ValidationResultEnum.ERROR, "The common headers map cannot be null"));
+            result.addResult(RestConnectionFieldEnum.COMMON_HEADERS, new ValidationResult(ValidationResultEnum.ERROR, ERROR_MSG_COMMON_HEADERS_NOT_VALID));
         }
     }
 
@@ -106,6 +112,7 @@ public abstract class AbstractRestConnectionValidator extends AbstractValidator 
         validator.setUsername(proxyUsername);
         validator.setPassword(proxyPassword);
         validator.setIgnoredProxyHosts(proxyIgnoreHosts);
+        result.addAllResults(validator.assertValid().getResultMap());
     }
 
     public abstract void validateAdditionalFields(ValidationResults currentResults);
