@@ -4,25 +4,23 @@ import org.junit.Test
 
 import com.blackducksoftware.integration.hub.proxy.ProxyInfoFieldEnum
 import com.blackducksoftware.integration.hub.validator.ProxyInfoValidator
-import com.blackducksoftware.integration.hub.validator.UnauthenticatedRestConnectionValidator
 import com.blackducksoftware.integration.validator.ValidationResults
 
 class ProxyInfoValidatorTest {
 
     @Test
     public void testProxyValid() {
-        UnauthenticatedRestConnectionValidator validator = new UnauthenticatedRestConnectionValidator()
-        ValidationResults result = new ValidationResults()
-        validator.validateProxyInfo(result)
+        ProxyInfoValidator validator = new ProxyInfoValidator()
+        ValidationResults result = validator.assertValid()
+        assert !validator.hasProxySettings()
         assert result.success
 
         result = new ValidationResults()
         String proxyHost = "proxyhost"
         int proxyPort = 25
-        validator.proxyHost = proxyHost
-        validator.proxyPort = proxyPort
-        validator.validateProxyInfo(result)
-        assert result.success
+        validator.host = proxyHost
+        validator.port = proxyPort
+        assert validator.hasProxySettings()
 
         result = new ValidationResults()
         proxyHost = "proxyhost"
@@ -30,17 +28,18 @@ class ProxyInfoValidatorTest {
         String username = "proxyUser"
         String password = "proxyPassword"
         String ignoredHost = ".*"
-        validator.proxyHost = proxyHost
-        validator.proxyPort = proxyPort
-        validator.proxyUsername = username
-        validator.proxyPassword = password
-        validator.proxyIgnoreHosts = ignoredHost
-        validator.validateProxyInfo(result)
-        assert proxyHost == validator.proxyHost
-        assert proxyPort == validator.proxyPort
-        assert username == validator.proxyUsername
-        assert password == validator.proxyPassword
-        assert ignoredHost == validator.proxyIgnoreHosts
+        validator.host = proxyHost
+        validator.port = proxyPort
+        validator.username = username
+        validator.password = password
+        validator.ignoredProxyHosts = ignoredHost
+        result = validator.assertValid()
+        assert proxyHost == validator.host
+        assert proxyPort == validator.port
+        assert username == validator.username
+        assert password == validator.password
+        assert ignoredHost == validator.ignoredProxyHosts
+        assert validator.hasProxySettings()
         assert result.success
     }
 
@@ -55,6 +54,7 @@ class ProxyInfoValidatorTest {
         validator.validatePort(result)
         assert proxyPort == Integer.parseInt(validator.port)
         assert "-1" == validator.port
+        assert validator.hasProxySettings()
         assert result.hasErrors()
         assert result.getResultString(ProxyInfoFieldEnum.PROXYPORT).contains(ProxyInfoValidator.MSG_PROXY_PORT_INVALID)
 
@@ -66,6 +66,7 @@ class ProxyInfoValidatorTest {
         validator.port = proxyPortStr
         validator.validatePort(result)
         assert proxyPortStr == validator.port
+        assert validator.hasProxySettings()
         assert result.hasErrors()
         assert null != result.getResultString(ProxyInfoFieldEnum.PROXYPORT)
 
@@ -77,6 +78,7 @@ class ProxyInfoValidatorTest {
         validator.port = proxyPortStr
         validator.validatePort(result)
         assert proxyPortStr == validator.port
+        assert validator.hasProxySettings()
         assert result.hasErrors()
         assert result.getResultString(ProxyInfoFieldEnum.PROXYHOST).contains(ProxyInfoValidator.MSG_PROXY_HOST_REQUIRED)
 
@@ -88,6 +90,7 @@ class ProxyInfoValidatorTest {
         validator.port = proxyPortStr
         validator.validatePort(result)
         assert proxyPortStr == validator.port
+        assert validator.hasProxySettings()
         assert result.hasErrors()
         assert result.getResultString(ProxyInfoFieldEnum.PROXYPORT).contains(ProxyInfoValidator.MSG_PROXY_PORT_REQUIRED)
     }
@@ -104,6 +107,8 @@ class ProxyInfoValidatorTest {
         validator.port = proxyPort
         validator.username = username
         validator.password = password
+        assert validator.hasAuthenticatedProxySettings()
+        assert validator.hasProxySettings()
         assert result.success
     }
 
@@ -126,6 +131,7 @@ class ProxyInfoValidatorTest {
         assert proxyPort == validator.port
         assert username == validator.username
         assert password == validator.password
+        assert validator.hasProxySettings()
         assert result.hasErrors()
         assert result.getResultString(ProxyInfoFieldEnum.PROXYHOST).contains(ProxyInfoValidator.MSG_PROXY_HOST_NOT_SPECIFIED)
 
@@ -145,6 +151,8 @@ class ProxyInfoValidatorTest {
         assert proxyPort == validator.port
         assert username == validator.username
         assert password == validator.password
+        assert !validator.hasAuthenticatedProxySettings()
+        assert validator.hasProxySettings()
         assert result.hasErrors()
         assert result.getResultString(ProxyInfoFieldEnum.PROXYUSERNAME).contains(ProxyInfoValidator.MSG_CREDENTIALS_INVALID)
         assert result.getResultString(ProxyInfoFieldEnum.PROXYPASSWORD).contains(ProxyInfoValidator.MSG_CREDENTIALS_INVALID)
@@ -164,6 +172,8 @@ class ProxyInfoValidatorTest {
         assert proxyPort == validator.port
         assert username == validator.username
         assert password == validator.password
+        assert !validator.hasAuthenticatedProxySettings()
+        assert validator.hasProxySettings()
         assert result.hasErrors()
         assert result.getResultString(ProxyInfoFieldEnum.PROXYUSERNAME).contains(ProxyInfoValidator.MSG_CREDENTIALS_INVALID)
         assert result.getResultString(ProxyInfoFieldEnum.PROXYPASSWORD).contains(ProxyInfoValidator.MSG_CREDENTIALS_INVALID)
@@ -175,12 +185,13 @@ class ProxyInfoValidatorTest {
         ValidationResults result = new ValidationResults()
         String proxyHost = "proxyhost"
         String proxyPort = 25
-        String ignoredHost = ".*"
+        String ignoredHost = ".*,.*"
         validator.host = proxyHost
         validator.port = proxyPort
         validator.ignoredProxyHosts = ignoredHost
-        validator.ignoredProxyHosts = ignoredHost
         validator.validateIgnoreHosts(result)
+        assert ignoredHost == validator.ignoredProxyHosts
+        assert validator.hasProxySettings()
         assert result.success
     }
 
@@ -192,13 +203,15 @@ class ProxyInfoValidatorTest {
         String proxyPort = 25
         String username = "proxyUser"
         String password = "proxyPassword"
-        String ignoredHost = ".asdfajdflkjaf{ ])(faslkfj"
+        String ignoredHost = ".asdfajdflkjaf{ ])(faslkfj,{][[)("
         validator.host = proxyHost
         validator.port = proxyPort
         validator.username = username
         validator.password = password
         validator.ignoredProxyHosts = ignoredHost
         validator.validateIgnoreHosts(result)
+        assert ignoredHost == validator.ignoredProxyHosts
+        assert validator.hasProxySettings()
         assert result.hasErrors()
         assert result.getResultString(ProxyInfoFieldEnum.NOPROXYHOSTS).contains(ProxyInfoValidator.MSG_IGNORE_HOSTS_INVALID)
 
@@ -210,6 +223,8 @@ class ProxyInfoValidatorTest {
         validator.port = proxyPort
         validator.ignoredProxyHosts = ignoredHost
         validator.validateIgnoreHosts(result)
+        assert ignoredHost == validator.ignoredProxyHosts
+        assert validator.hasProxySettings()
         assert result.hasErrors()
         assert result.getResultString(ProxyInfoFieldEnum.PROXYHOST).contains(ProxyInfoValidator.MSG_PROXY_HOST_NOT_SPECIFIED)
     }
