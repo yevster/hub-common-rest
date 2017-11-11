@@ -33,6 +33,10 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.RecursiveToStringStyle;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 
 import com.blackducksoftware.integration.exception.EncryptionException;
 import com.blackducksoftware.integration.hub.Credentials;
@@ -78,73 +82,17 @@ public class ProxyInfo implements Serializable {
 
     @Override
     public String toString() {
-        final StringBuilder builder = new StringBuilder();
-        builder.append("HubProxyInfo [host=");
-        builder.append(host);
-        builder.append(", port=");
-        builder.append(port);
-        builder.append(", username=");
-        builder.append(getUsername());
-        builder.append(", encryptedPassword=");
-        builder.append(getEncryptedPassword());
-        builder.append(", actualPasswordLength=");
-        builder.append(getActualPasswordLength());
-        builder.append(", ignoredProxyHosts=");
-        builder.append(ignoredProxyHosts);
-        builder.append("]");
-        return builder.toString();
+        return ReflectionToStringBuilder.toString(this, RecursiveToStringStyle.JSON_STYLE);
     }
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((proxyCredentials == null) ? 0 : proxyCredentials.hashCode());
-        result = prime * result + ((host == null) ? 0 : host.hashCode());
-        result = prime * result + ((ignoredProxyHosts == null) ? 0 : ignoredProxyHosts.hashCode());
-        result = prime * result + port;
-        return result;
+        return HashCodeBuilder.reflectionHashCode(this);
     }
 
     @Override
     public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (!(obj instanceof ProxyInfo)) {
-            return false;
-        }
-        final ProxyInfo other = (ProxyInfo) obj;
-        if (getProxyCredentials() == null) {
-            if (other.getProxyCredentials() != null) {
-                return false;
-            }
-        } else if (!getProxyCredentials().equals(other.getProxyCredentials())) {
-            return false;
-        }
-
-        if (host == null) {
-            if (other.host != null) {
-                return false;
-            }
-        } else if (!host.equals(other.host)) {
-            return false;
-        }
-        if (ignoredProxyHosts == null) {
-            if (other.ignoredProxyHosts != null) {
-                return false;
-            }
-        } else if (!ignoredProxyHosts.equals(other.ignoredProxyHosts)) {
-            return false;
-        }
-        if (port != other.port) {
-            return false;
-        }
-
-        return true;
+        return EqualsBuilder.reflectionEquals(this, obj);
     }
 
     public String getHost() {

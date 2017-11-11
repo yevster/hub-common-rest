@@ -45,7 +45,7 @@ public class OAuthRestConnectionBuilder extends AbstractRestConnectionBuilder<OA
         this.tokenManager = tokenManager;
     }
 
-    public void setTokenManager(final AccessType accessType) {
+    public void setAccessType(final AccessType accessType) {
         this.accessType = accessType;
     }
 
