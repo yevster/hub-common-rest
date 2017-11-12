@@ -43,7 +43,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
@@ -60,7 +59,6 @@ import com.blackducksoftware.integration.hub.proxy.ProxyInfo;
 import com.blackducksoftware.integration.hub.rest.exception.IntegrationRestException;
 import com.blackducksoftware.integration.log.IntLogger;
 import com.blackducksoftware.integration.log.LogLevel;
-import com.blackducksoftware.integration.util.proxy.ProxyUtil;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParser;
@@ -78,6 +76,8 @@ import okhttp3.Response;
  * The parent class of all Hub connections.
  */
 public abstract class RestConnection {
+    private static final String ERROR_MSG_PROXY_INFO_NULL = "A RestConnection's proxy information cannot be null";
+
     public static final String JSON_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSX";
 
     public final Gson gson = new GsonBuilder().setDateFormat(JSON_DATE_FORMAT).create();
@@ -198,14 +198,10 @@ public abstract class RestConnection {
     }
 
     private boolean shouldUseProxyForUrl(final URL url) {
-        if (ProxyInfo.NO_PROXY_INFO.equals(this.proxyInfo)) {
-            return false;
+        if (this.proxyInfo == null) {
+            throw new IllegalStateException(ERROR_MSG_PROXY_INFO_NULL);
         }
-        if (StringUtils.isBlank(this.proxyInfo.getHost()) || this.proxyInfo.getPort() <= 0) {
-            return false;
-        }
-        final List<Pattern> ignoredProxyHostPatterns = ProxyUtil.getIgnoredProxyHostPatterns(this.proxyInfo.getIgnoredProxyHosts());
-        return !ProxyUtil.shouldIgnoreHost(url.getHost(), ignoredProxyHostPatterns);
+        return this.proxyInfo.shouldUseProxyForUrl(url);
     }
 
     public HttpUrl createHttpUrl() {

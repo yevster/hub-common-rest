@@ -73,6 +73,9 @@ public class ProxyInfo implements Serializable {
     }
 
     public boolean shouldUseProxyForUrl(final URL url) {
+        if (NO_PROXY_INFO.equals(this)) {
+            return false;
+        }
         if (StringUtils.isBlank(host) || port <= 0) {
             return false;
         }
@@ -150,5 +153,13 @@ public class ProxyInfo implements Serializable {
     private Credentials getProxyCredentials() {
         return proxyCredentials;
     };
+
+    private final static class NoProxyInfo extends ProxyInfo {
+        private static final long serialVersionUID = 7646573390510702513L;
+
+        public NoProxyInfo() {
+            super("", 0, null, "");
+        }
+    }
 
 }
