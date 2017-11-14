@@ -148,7 +148,7 @@ class OkOauthAuthenticatorTest {
         previousResponseBuilder.request(initialRequest.build())
         previousResponseBuilder.protocol(Protocol.HTTP_1_1)
         previousResponseBuilder.code(200)
-
+        previousResponseBuilder.message("OK")
         Response previousResponse = previousResponseBuilder.build()
 
         Response.Builder currentResponse = new Response.Builder()
@@ -156,6 +156,7 @@ class OkOauthAuthenticatorTest {
         currentResponse.request(initialRequest.build())
         currentResponse.protocol(Protocol.HTTP_1_1)
         currentResponse.code(200)
+        currentResponse.message("OK")
 
         Request request = authenticator.authenticate(route, currentResponse.build())
         assert null == request
@@ -174,6 +175,7 @@ class OkOauthAuthenticatorTest {
         response.request(initialRequest.build())
         response.protocol(Protocol.HTTP_1_1)
         response.code(401)
+        response.message("Unauthorized")
         Request request = authenticator.authenticate(route, response.build())
         assert null != request
     }
@@ -192,8 +194,9 @@ class OkOauthAuthenticatorTest {
             response.request(initialRequest.build())
             response.protocol(Protocol.HTTP_1_1)
             response.code(401)
-
-            authenticator.authenticate(route, response.build())
+            response.message("Unauthorized")
+            Response httpResponse = response.build();
+            authenticator.authenticate(route, httpResponse)
             fail('Should have thrown exception')
         } catch (Exception e){
             assert null != e

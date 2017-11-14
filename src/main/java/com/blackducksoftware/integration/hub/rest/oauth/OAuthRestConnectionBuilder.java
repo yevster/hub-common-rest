@@ -50,6 +50,15 @@ public class OAuthRestConnectionBuilder extends AbstractRestConnectionBuilder<OA
     }
 
     @Override
+    public void applyProxyInfo(final ProxyInfo proxyInfo) {
+        super.applyProxyInfo(proxyInfo);
+        // throws an illegal argument exception if the proxy info is bad
+        if (tokenManager != null) {
+            this.tokenManager.setProxyInfo(proxyInfo);
+        }
+    }
+
+    @Override
     public AbstractValidator createValidator() {
         final OauthRestConnectionValidator validator = new OauthRestConnectionValidator();
         validator.setBaseUrl(getBaseUrl());

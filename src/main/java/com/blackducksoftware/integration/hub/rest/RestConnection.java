@@ -437,4 +437,7 @@ public abstract class RestConnection {
         this.client = client;
     }
 
+    public ProxyInfo getProxyInfo() {
+        return proxyInfo;
+    }
 }
