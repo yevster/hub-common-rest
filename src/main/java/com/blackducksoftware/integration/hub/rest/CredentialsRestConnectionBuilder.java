@@ -23,6 +23,8 @@
  */
 package com.blackducksoftware.integration.hub.rest;
 
+import com.blackducksoftware.integration.exception.EncryptionException;
+import com.blackducksoftware.integration.hub.Credentials;
 import com.blackducksoftware.integration.hub.proxy.ProxyInfo;
 import com.blackducksoftware.integration.hub.validator.CredentialsRestConnectionValidator;
 import com.blackducksoftware.integration.validator.AbstractValidator;
@@ -46,6 +48,15 @@ public class CredentialsRestConnectionBuilder extends AbstractRestConnectionBuil
 
     public void setPassword(final String password) {
         this.password = password;
+    }
+
+    public void applyCredentials(final Credentials credentials) {
+        try {
+            setUsername(credentials.getUsername());
+            setPassword(credentials.getDecryptedPassword());
+        } catch (IllegalArgumentException | EncryptionException ex) {
+            throw new IllegalArgumentException(ex);
+        }
     }
 
     @Override
