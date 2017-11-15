@@ -25,11 +25,12 @@ package com.blackducksoftware.integration.hub
 
 import org.junit.Test
 
+import com.blackducksoftware.integration.hub.proxy.ProxyInfo
 import com.blackducksoftware.integration.hub.request.HubPagedRequest
 import com.blackducksoftware.integration.hub.request.HubRequest
 import com.blackducksoftware.integration.hub.request.HubRequestFactory
 import com.blackducksoftware.integration.hub.rest.RestConnection
-import com.blackducksoftware.integration.hub.rest.UnauthenticatedRestConnection
+import com.blackducksoftware.integration.hub.rest.UnauthenticatedRestConnectionBuilder
 import com.blackducksoftware.integration.log.LogLevel
 import com.blackducksoftware.integration.log.PrintStreamIntLogger
 
@@ -41,7 +42,12 @@ class HubRequestFactoryTest {
     public static final int CONNECTION_TIMEOUT = 213
 
     private RestConnection getRestConnection(){
-        new UnauthenticatedRestConnection(new PrintStreamIntLogger(System.out, LogLevel.TRACE), GOOGLE_URL, CONNECTION_TIMEOUT)
+        UnauthenticatedRestConnectionBuilder builder = new UnauthenticatedRestConnectionBuilder();
+        builder.logger = new PrintStreamIntLogger(System.out, LogLevel.TRACE)
+        builder.baseUrl = GOOGLE_URL_STRING
+        builder.timeout = CONNECTION_TIMEOUT
+        builder.applyProxyInfo(ProxyInfo.NO_PROXY_INFO)
+        builder.build()
     }
 
     @Test

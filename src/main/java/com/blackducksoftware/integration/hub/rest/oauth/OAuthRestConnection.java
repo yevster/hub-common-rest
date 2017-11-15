@@ -26,6 +26,7 @@ package com.blackducksoftware.integration.hub.rest.oauth;
 import java.net.URL;
 
 import com.blackducksoftware.integration.exception.IntegrationException;
+import com.blackducksoftware.integration.hub.proxy.ProxyInfo;
 import com.blackducksoftware.integration.hub.rest.RestConnection;
 import com.blackducksoftware.integration.log.IntLogger;
 
@@ -33,8 +34,8 @@ public class OAuthRestConnection extends RestConnection {
     private final TokenManager tokenManager;
     private final AccessType accessType;
 
-    public OAuthRestConnection(final IntLogger logger, final URL hubBaseUrl, final int timeout, final TokenManager tokenManager, final AccessType accessType) {
-        super(logger, hubBaseUrl, timeout);
+    public OAuthRestConnection(final IntLogger logger, final URL hubBaseUrl, final int timeout, final TokenManager tokenManager, final AccessType accessType, final ProxyInfo proxyInfo) {
+        super(logger, hubBaseUrl, timeout, proxyInfo);
         this.tokenManager = tokenManager;
         this.accessType = accessType;
     }

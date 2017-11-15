@@ -28,7 +28,9 @@ import java.util.logging.Logger
 
 import org.junit.Assert;
 
+import com.blackducksoftware.integration.hub.proxy.ProxyInfo
 import com.blackducksoftware.integration.hub.rest.CredentialsRestConnection
+import com.blackducksoftware.integration.hub.rest.CredentialsRestConnectionBuilder
 import com.blackducksoftware.integration.log.LogLevel
 import com.blackducksoftware.integration.log.PrintStreamIntLogger
 
@@ -118,12 +120,29 @@ public class RestConnectionTestHelper {
     }
 
     public CredentialsRestConnection getRestConnection(final LogLevel logLevel) {
-        final CredentialsRestConnection restConnection = new CredentialsRestConnection(new PrintStreamIntLogger(System.out, logLevel),
-                getIntegrationHubServerUrl(), getTestUsername(), getTestPassword(), 120);
-
-        return restConnection;
+        CredentialsRestConnectionBuilder builder = new CredentialsRestConnectionBuilder();
+        builder.logger = new PrintStreamIntLogger(System.out, LogLevel.TRACE);
+        builder.baseUrl = getIntegrationHubServerUrl()
+        builder.timeout = 120
+        builder.username = getTestUsername()
+        builder.password = getTestPassword()
+        builder.applyProxyInfo(ProxyInfo.NO_PROXY_INFO)
+        CredentialsRestConnection restConnection = builder.build()
+        return restConnection
     }
-    
+
+    public CredentialsRestConnection getRestConnection(final LogLevel logLevel, ProxyInfo proxyInfo) {
+        CredentialsRestConnectionBuilder builder = new CredentialsRestConnectionBuilder();
+        builder.logger = new PrintStreamIntLogger(System.out, LogLevel.TRACE);
+        builder.baseUrl = getIntegrationHubServerUrl()
+        builder.timeout = 120
+        builder.username = getTestUsername()
+        builder.password = getTestPassword()
+        builder.applyProxyInfo(proxyInfo)
+        CredentialsRestConnection restConnection = builder.build()
+        return restConnection
+    }
+
     public File getFile(final String classpathResource) {
         try {
             final URL url = Thread.currentThread().getContextClassLoader().getResource(classpathResource)

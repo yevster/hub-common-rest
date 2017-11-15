@@ -65,6 +65,7 @@ class OkAuthenticatorTest {
         response.protocol(Protocol.HTTP_1_1)
         response.code(407)
         response.addHeader("Proxy-Authenticate", 'Basic realm="test proxy authentication"')
+        response.message("Proxy Authentication Required");
         Request request = authenticator.authenticate(route, response.build())
         assert null != request
         assert null != request.header(OkAuthenticator.PROXY_AUTH_RESP)
@@ -84,7 +85,7 @@ class OkAuthenticatorTest {
         previousResponseBuilder.protocol(Protocol.HTTP_1_1)
         previousResponseBuilder.code(407)
         previousResponseBuilder.addHeader("Proxy-Authenticate", 'Basic realm="test proxy authentication"')
-
+        previousResponseBuilder.message("Proxy Authentication Required");
         Response previousResponse = previousResponseBuilder.build()
 
         Response.Builder currentResponse = new Response.Builder()
@@ -92,6 +93,7 @@ class OkAuthenticatorTest {
         currentResponse.request(initialRequest.build())
         currentResponse.protocol(Protocol.HTTP_1_1)
         currentResponse.code(407)
+        currentResponse.message("Proxy Authentication Required");
         currentResponse.addHeader("Proxy-Authenticate", 'Basic realm="test proxy authentication"')
 
         Request request = authenticator.authenticate(route, currentResponse.build())
@@ -112,6 +114,7 @@ class OkAuthenticatorTest {
         response.protocol(Protocol.HTTP_1_1)
         response.code(401)
         response.addHeader("WWW-Authenticate", 'Basic realm="test authentication"')
+        response.message("Unauthorized");
         Request request = authenticator.authenticate(route, response.build())
         assert null != request
         assert null != request.header(OkAuthenticator.WWW_AUTH_RESP)
@@ -130,6 +133,7 @@ class OkAuthenticatorTest {
         response.request(initialRequest.build())
         response.protocol(Protocol.HTTP_1_1)
         response.code(200)
+        response.message("OK");
         Request request = authenticator.authenticate(route, response.build())
         assert null == request
     }
@@ -147,6 +151,7 @@ class OkAuthenticatorTest {
         response.request(initialRequest.build())
         response.protocol(Protocol.HTTP_1_1)
         response.code(407)
+        response.message("Proxy Authentication Required");
         Request request = authenticator.authenticate(route, response.build())
         assert null == request
     }

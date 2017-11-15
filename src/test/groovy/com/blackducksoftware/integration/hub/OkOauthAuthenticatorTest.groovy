@@ -30,8 +30,9 @@ import org.junit.Before
 import org.junit.Test
 
 import com.blackducksoftware.integration.hub.api.oauth.OAuthConfiguration
+import com.blackducksoftware.integration.hub.proxy.ProxyInfo
 import com.blackducksoftware.integration.hub.rest.RestConnection
-import com.blackducksoftware.integration.hub.rest.UnauthenticatedRestConnection
+import com.blackducksoftware.integration.hub.rest.UnauthenticatedRestConnectionBuilder
 import com.blackducksoftware.integration.hub.rest.oauth.AccessType
 import com.blackducksoftware.integration.hub.rest.oauth.OkOauthAuthenticator
 import com.blackducksoftware.integration.hub.rest.oauth.TokenManager
@@ -103,7 +104,12 @@ class OkOauthAuthenticatorTest {
                     }
                 };
         server.setDispatcher(dispatcher);
-        new UnauthenticatedRestConnection(new PrintStreamIntLogger(System.out, LogLevel.TRACE), server.url("/").url(), CONNECTION_TIMEOUT)
+        UnauthenticatedRestConnectionBuilder builder = new UnauthenticatedRestConnectionBuilder()
+        builder.logger = new PrintStreamIntLogger(System.out, LogLevel.TRACE)
+        builder.baseUrl = server.url("/").url()
+        builder.timeout = CONNECTION_TIMEOUT
+        builder.applyProxyInfo(ProxyInfo.NO_PROXY_INFO)
+        builder.build()
     }
 
     private TokenManager getTokenManager(){
@@ -142,7 +148,7 @@ class OkOauthAuthenticatorTest {
         previousResponseBuilder.request(initialRequest.build())
         previousResponseBuilder.protocol(Protocol.HTTP_1_1)
         previousResponseBuilder.code(200)
-
+        previousResponseBuilder.message("OK")
         Response previousResponse = previousResponseBuilder.build()
 
         Response.Builder currentResponse = new Response.Builder()
@@ -150,6 +156,7 @@ class OkOauthAuthenticatorTest {
         currentResponse.request(initialRequest.build())
         currentResponse.protocol(Protocol.HTTP_1_1)
         currentResponse.code(200)
+        currentResponse.message("OK")
 
         Request request = authenticator.authenticate(route, currentResponse.build())
         assert null == request
@@ -168,6 +175,7 @@ class OkOauthAuthenticatorTest {
         response.request(initialRequest.build())
         response.protocol(Protocol.HTTP_1_1)
         response.code(401)
+        response.message("Unauthorized")
         Request request = authenticator.authenticate(route, response.build())
         assert null != request
     }
@@ -186,8 +194,9 @@ class OkOauthAuthenticatorTest {
             response.request(initialRequest.build())
             response.protocol(Protocol.HTTP_1_1)
             response.code(401)
-
-            authenticator.authenticate(route, response.build())
+            response.message("Unauthorized")
+            Response httpResponse = response.build();
+            authenticator.authenticate(route, httpResponse)
             fail('Should have thrown exception')
         } catch (Exception e){
             assert null != e

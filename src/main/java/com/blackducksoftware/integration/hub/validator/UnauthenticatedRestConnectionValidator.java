@@ -21,25 +21,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.blackducksoftware.integration.hub.rest;
+package com.blackducksoftware.integration.hub.validator;
 
-import java.net.URL;
+import com.blackducksoftware.integration.validator.ValidationResults;
 
-import com.blackducksoftware.integration.exception.IntegrationException;
-import com.blackducksoftware.integration.hub.proxy.ProxyInfo;
-import com.blackducksoftware.integration.log.IntLogger;
-
-public class UnauthenticatedRestConnection extends RestConnection {
-    public UnauthenticatedRestConnection(final IntLogger logger, final URL hubBaseUrl, final int timeout, final ProxyInfo proxyInfo) {
-        super(logger, hubBaseUrl, timeout, proxyInfo);
-    }
+public class UnauthenticatedRestConnectionValidator extends AbstractRestConnectionValidator {
 
     @Override
-    public void addBuilderAuthentication() throws IntegrationException {
+    public void validateAdditionalFields(final ValidationResults currentResults) {
+        // no additional fields
     }
-
-    @Override
-    public void clientAuthenticate() throws IntegrationException {
-    }
-
 }

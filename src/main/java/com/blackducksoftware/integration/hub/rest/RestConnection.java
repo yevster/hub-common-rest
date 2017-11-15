@@ -43,7 +43,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
@@ -53,12 +52,13 @@ import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.blackducksoftware.integration.exception.EncryptionException;
 import com.blackducksoftware.integration.exception.IntegrationException;
 import com.blackducksoftware.integration.hub.certificate.CertTrustManager;
+import com.blackducksoftware.integration.hub.proxy.ProxyInfo;
 import com.blackducksoftware.integration.hub.rest.exception.IntegrationRestException;
 import com.blackducksoftware.integration.log.IntLogger;
 import com.blackducksoftware.integration.log.LogLevel;
-import com.blackducksoftware.integration.util.proxy.ProxyUtil;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParser;
@@ -76,6 +76,8 @@ import okhttp3.Response;
  * The parent class of all Hub connections.
  */
 public abstract class RestConnection {
+    private static final String ERROR_MSG_PROXY_INFO_NULL = "A RestConnection's proxy information cannot be null";
+
     public static final String JSON_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSX";
 
     public final Gson gson = new GsonBuilder().setDateFormat(JSON_DATE_FORMAT).create();
@@ -84,11 +86,7 @@ public abstract class RestConnection {
     public final Map<String, String> commonRequestHeaders = new HashMap<>();
     public final URL hubBaseUrl;
     public int timeout = 120;
-    public String proxyHost;
-    public int proxyPort;
-    public String proxyNoHosts;
-    public String proxyUsername;
-    public String proxyPassword;
+    private final ProxyInfo proxyInfo;
     public boolean alwaysTrustServerCertificate;
     public IntLogger logger;
 
@@ -106,10 +104,11 @@ public abstract class RestConnection {
         return sdf.format(date);
     }
 
-    public RestConnection(final IntLogger logger, final URL hubBaseUrl, final int timeout) {
+    public RestConnection(final IntLogger logger, final URL hubBaseUrl, final int timeout, final ProxyInfo proxyInfo) {
         this.logger = logger;
         this.hubBaseUrl = hubBaseUrl;
         this.timeout = timeout;
+        this.proxyInfo = proxyInfo;
     }
 
     public void connect() throws IntegrationException {
@@ -182,24 +181,27 @@ public abstract class RestConnection {
         builder.readTimeout(timeout, TimeUnit.SECONDS);
     }
 
-    private void addBuilderProxyInformation() {
+    private void addBuilderProxyInformation() throws IntegrationException {
         if (shouldUseProxyForUrl(hubBaseUrl)) {
             builder.proxy(getProxy(hubBaseUrl));
-            builder.proxyAuthenticator(new com.blackducksoftware.integration.hub.proxy.OkAuthenticator(proxyUsername, proxyPassword));
+            try {
+                builder.proxyAuthenticator(new com.blackducksoftware.integration.hub.proxy.OkAuthenticator(this.proxyInfo.getUsername(), this.proxyInfo.getDecryptedPassword()));
+            } catch (IllegalArgumentException | EncryptionException ex) {
+                throw new IntegrationException(ex);
+            }
         }
     }
 
     private Proxy getProxy(final URL hubUrl) {
-        final Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
+        final Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(this.proxyInfo.getHost(), this.proxyInfo.getPort()));
         return proxy;
     }
 
     private boolean shouldUseProxyForUrl(final URL url) {
-        if (StringUtils.isBlank(proxyHost) || proxyPort <= 0) {
-            return false;
+        if (this.proxyInfo == null) {
+            throw new IllegalStateException(ERROR_MSG_PROXY_INFO_NULL);
         }
-        final List<Pattern> ignoredProxyHostPatterns = ProxyUtil.getIgnoredProxyHostPatterns(proxyNoHosts);
-        return !ProxyUtil.shouldIgnoreHost(url.getHost(), ignoredProxyHostPatterns);
+        return this.proxyInfo.shouldUseProxyForUrl(url);
     }
 
     public HttpUrl createHttpUrl() {
@@ -435,4 +437,7 @@ public abstract class RestConnection {
         this.client = client;
     }
 
+    public ProxyInfo getProxyInfo() {
+        return proxyInfo;
+    }
 }

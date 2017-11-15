@@ -21,25 +21,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.blackducksoftware.integration.hub.rest;
+package com.blackducksoftware.integration.hub.proxy;
 
-import java.net.URL;
+import com.blackducksoftware.integration.validator.FieldEnum;
 
-import com.blackducksoftware.integration.exception.IntegrationException;
-import com.blackducksoftware.integration.hub.proxy.ProxyInfo;
-import com.blackducksoftware.integration.log.IntLogger;
+public enum ProxyInfoFieldEnum implements FieldEnum {
+    PROXYHOST("proxyHost"),
+    PROXYPORT("proxyPort"),
+    PROXYUSERNAME("proxyUsername"),
+    PROXYPASSWORD("proxyPassword"),
+    NOPROXYHOSTS("noProxyHosts");
 
-public class UnauthenticatedRestConnection extends RestConnection {
-    public UnauthenticatedRestConnection(final IntLogger logger, final URL hubBaseUrl, final int timeout, final ProxyInfo proxyInfo) {
-        super(logger, hubBaseUrl, timeout, proxyInfo);
+    private String key;
+
+    private ProxyInfoFieldEnum(final String key) {
+        this.key = key;
     }
 
     @Override
-    public void addBuilderAuthentication() throws IntegrationException {
-    }
-
-    @Override
-    public void clientAuthenticate() throws IntegrationException {
+    public String getKey() {
+        return key;
     }
 
 }

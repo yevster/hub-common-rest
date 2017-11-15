@@ -34,6 +34,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 
 import com.blackducksoftware.integration.exception.IntegrationException;
+import com.blackducksoftware.integration.hub.proxy.ProxyInfo;
 import com.blackducksoftware.integration.hub.rest.exception.IntegrationRestException;
 import com.blackducksoftware.integration.log.IntLogger;
 
@@ -48,8 +49,8 @@ public class CredentialsRestConnection extends RestConnection {
     private final String hubUsername;
     private final String hubPassword;
 
-    public CredentialsRestConnection(final IntLogger logger, final URL hubBaseUrl, final String hubUsername, final String hubPassword, final int timeout) {
-        super(logger, hubBaseUrl, timeout);
+    public CredentialsRestConnection(final IntLogger logger, final URL hubBaseUrl, final String hubUsername, final String hubPassword, final int timeout, final ProxyInfo proxyInfo) {
+        super(logger, hubBaseUrl, timeout, proxyInfo);
         this.hubUsername = hubUsername;
         this.hubPassword = hubPassword;
     }
