@@ -44,11 +44,17 @@ public class TokenManager {
     private OAuthConfiguration configuration;
     private Token clientToken;
     private ProxyInfo proxyInfo;
+    private boolean alwaysTrustServerCertificate;
 
     public TokenManager(final IntLogger logger, final int timeout) {
+        this(logger, timeout, ProxyInfo.NO_PROXY_INFO, false);
+    }
+
+    public TokenManager(final IntLogger logger, final int timeout, final ProxyInfo proxyInfo, final boolean alwaysTrustServerCertificate) {
         this.logger = logger;
         this.timeout = timeout;
-        this.proxyInfo = ProxyInfo.NO_PROXY_INFO; // initially assume no proxy
+        this.proxyInfo = proxyInfo;
+        this.alwaysTrustServerCertificate = alwaysTrustServerCertificate;
     }
 
     public IntLogger getLogger() {
@@ -73,6 +79,14 @@ public class TokenManager {
 
     public void setProxyInfo(final ProxyInfo proxyInfo) {
         this.proxyInfo = proxyInfo;
+    }
+
+    public boolean isAlwaysTrustServerCertificate() {
+        return alwaysTrustServerCertificate;
+    }
+
+    public void setAlwaysTrustServerCertificate(final boolean alwaysTrustServerCertificate) {
+        this.alwaysTrustServerCertificate = alwaysTrustServerCertificate;
     }
 
     public String createTokenCredential(final String token) {
@@ -155,6 +169,7 @@ public class TokenManager {
         connectionBuilder.setBaseUrl(configuration.tokenUri);
         connectionBuilder.setTimeout(timeout);
         connectionBuilder.setLogger(getLogger());
+        connectionBuilder.setAlwaysTrustServerCertificate(alwaysTrustServerCertificate);
         connectionBuilder.applyProxyInfo(proxyInfo);
 
         final RestConnection connection = connectionBuilder.build();

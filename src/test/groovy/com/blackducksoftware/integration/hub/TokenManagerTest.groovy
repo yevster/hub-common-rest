@@ -31,6 +31,7 @@ import com.blackducksoftware.integration.exception.IntegrationException
 import com.blackducksoftware.integration.hub.api.oauth.OAuthConfiguration
 import com.blackducksoftware.integration.hub.api.oauth.Token
 import com.blackducksoftware.integration.hub.proxy.ProxyInfo
+import com.blackducksoftware.integration.hub.proxy.ProxyInfoBuilder
 import com.blackducksoftware.integration.hub.rest.exception.IntegrationRestException
 import com.blackducksoftware.integration.hub.rest.oauth.AccessType
 import com.blackducksoftware.integration.hub.rest.oauth.TokenManager
@@ -116,11 +117,27 @@ class TokenManagerTest {
     }
 
     @Test
-    public void testCreateTokenCredential(){
+    public void testTokenManagerProperties() {
         TokenManager tokenManager = getTokenManager()
         assert null != tokenManager.getLogger()
         assert null != tokenManager.getTimeout()
         assert null != tokenManager.getConfiguration()
+        assert !tokenManager.isAlwaysTrustServerCertificate()
+        assert ProxyInfo.NO_PROXY_INFO == tokenManager.getProxyInfo()
+
+        tokenManager.setAlwaysTrustServerCertificate(true)
+        ProxyInfoBuilder builder = new ProxyInfoBuilder();
+        builder.setHost("a.proxy.host")
+        builder.setPort("12345")
+        ProxyInfo proxyInfo = builder.build()
+        tokenManager.setProxyInfo(proxyInfo)
+        assert tokenManager.isAlwaysTrustServerCertificate()
+        assert proxyInfo == tokenManager.getProxyInfo()
+    }
+
+    @Test
+    public void testCreateTokenCredential(){
+        TokenManager tokenManager = getTokenManager()
         String token = 'test'
         String output = tokenManager.createTokenCredential(token)
         assert null != output
