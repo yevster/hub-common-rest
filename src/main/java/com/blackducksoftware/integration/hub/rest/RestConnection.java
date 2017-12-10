@@ -328,6 +328,14 @@ public abstract class RestConnection {
         return handleExecuteClientCall(request);
     }
 
+    public String readResponseString(final Response response) throws IntegrationException {
+        try {
+            return response.body().string();
+        } catch (final IOException e) {
+            throw new IntegrationException(e);
+        }
+    }
+
     @Deprecated
     /**
      * @deprecated Please use createResponse(Request request) instead.
