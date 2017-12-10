@@ -25,6 +25,7 @@ package com.blackducksoftware.integration.hub.request;
 
 import static com.blackducksoftware.integration.hub.RestConstants.QUERY_Q;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -58,55 +59,61 @@ public class HubRequest {
     public Response executeGet() throws IntegrationException {
         final HttpUrl httpUrl = buildHttpUrl();
         final Request request = restConnection.createGetRequest(httpUrl);
-        return restConnection.handleExecuteClientCall(request);
+        return restConnection.createResponse(request);
     }
 
     public Response executeGet(final String mediaType) throws IntegrationException {
         final HttpUrl httpUrl = buildHttpUrl();
         final Request request = restConnection.createGetRequest(httpUrl, mediaType);
-        return restConnection.handleExecuteClientCall(request);
+        return restConnection.createResponse(request);
     }
 
     public Response executeEncodedFormPost(final Map<String, String> contentMap) throws IntegrationException {
         final HttpUrl httpUrl = buildHttpUrl();
         final Request request = restConnection.createPostRequest(httpUrl, restConnection.createEncodedFormBody(contentMap));
-        return restConnection.handleExecuteClientCall(request);
+        return restConnection.createResponse(request);
     }
 
     public Response executePost(final String content) throws IntegrationException {
         final HttpUrl httpUrl = buildHttpUrl();
         final Request request = restConnection.createPostRequest(httpUrl, restConnection.createJsonRequestBody(content));
-        return restConnection.handleExecuteClientCall(request);
+        return restConnection.createResponse(request);
     }
 
     public Response executePost(final String mediaType, final String content) throws IntegrationException {
         final HttpUrl httpUrl = buildHttpUrl();
         final Request request = restConnection.createPostRequest(httpUrl, restConnection.createJsonRequestBody(mediaType, content));
-        return restConnection.handleExecuteClientCall(request);
+        return restConnection.createResponse(request);
+    }
+
+    public Response executePost(final String mediaType, final File file) throws IntegrationException {
+        final HttpUrl httpUrl = buildHttpUrl();
+        final Request request = restConnection.createPostRequest(httpUrl, restConnection.createFileRequestBody(mediaType, file));
+        return restConnection.createResponse(request);
     }
 
     public Response executeEncodedFormPut(final Map<String, String> contentMap) throws IntegrationException {
         final HttpUrl httpUrl = buildHttpUrl();
         final Request request = restConnection.createPutRequest(httpUrl, restConnection.createEncodedFormBody(contentMap));
-        return restConnection.handleExecuteClientCall(request);
+        return restConnection.createResponse(request);
     }
 
     public Response executePut(final String content) throws IntegrationException {
         final HttpUrl httpUrl = buildHttpUrl();
         final Request request = restConnection.createPutRequest(httpUrl, restConnection.createJsonRequestBody(content));
-        return restConnection.handleExecuteClientCall(request);
+        return restConnection.createResponse(request);
     }
 
     public Response executePut(final String mediaType, final String content) throws IntegrationException {
         final HttpUrl httpUrl = buildHttpUrl();
         final Request request = restConnection.createPutRequest(httpUrl, restConnection.createJsonRequestBody(mediaType, content));
-        return restConnection.handleExecuteClientCall(request);
+        return restConnection.createResponse(request);
     }
 
     public void executeDelete() throws IntegrationException {
         final HttpUrl httpUrl = buildHttpUrl();
         final Request request = restConnection.createDeleteRequest(httpUrl);
-        try (Response response = restConnection.handleExecuteClientCall(request)) {
+        try (Response response = restConnection.createResponse(request)) {
 
         }
     }

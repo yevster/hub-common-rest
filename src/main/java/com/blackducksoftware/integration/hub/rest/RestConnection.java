@@ -23,6 +23,7 @@
  */
 package com.blackducksoftware.integration.hub.rest;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
@@ -260,6 +261,10 @@ public abstract class RestConnection {
         return RequestBody.create(MediaType.parse(mediaType), content);
     }
 
+    public RequestBody createFileRequestBody(final String mediaType, final File file) {
+        return RequestBody.create(MediaType.parse(mediaType), file);
+    }
+
     public RequestBody createEncodedFormBody(final Map<String, String> content) {
         final FormBody.Builder builder = new FormBody.Builder();
         for (final Entry<String, String> contentEntry : content.entrySet()) {
@@ -326,14 +331,6 @@ public abstract class RestConnection {
 
     public Response createResponse(final Request request) throws IntegrationException {
         return handleExecuteClientCall(request);
-    }
-
-    public String readResponseString(final Response response) throws IntegrationException {
-        try {
-            return response.body().string();
-        } catch (final IOException e) {
-            throw new IntegrationException(e);
-        }
     }
 
     @Deprecated

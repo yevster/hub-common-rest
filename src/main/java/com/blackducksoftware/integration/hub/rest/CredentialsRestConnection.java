@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.blackducksoftware.integration.exception.IntegrationException;
@@ -75,7 +76,6 @@ public class CredentialsRestConnection extends RestConnection {
 
         final Map<String, String> content = new HashMap<>();
         if (StringUtils.isNotBlank(hubUsername) && StringUtils.isNotBlank(hubPassword)) {
-
             content.put("j_username", hubUsername);
             content.put("j_password", hubPassword);
             final Request request = createPostRequest(httpUrl, createEncodedFormBody(content));
@@ -96,9 +96,7 @@ public class CredentialsRestConnection extends RestConnection {
             } catch (final IOException e) {
                 throw new IntegrationException(e.getMessage(), e);
             } finally {
-                if (response != null) {
-                    response.close();
-                }
+                IOUtils.closeQuietly(response);
             }
         }
     }
