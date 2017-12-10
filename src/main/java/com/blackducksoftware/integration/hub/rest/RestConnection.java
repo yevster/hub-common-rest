@@ -324,6 +324,14 @@ public abstract class RestConnection {
         return builder.build();
     }
 
+    public Response createResponse(final Request request) throws IntegrationException {
+        return handleExecuteClientCall(request);
+    }
+
+    @Deprecated
+    /**
+     * @deprecated Please use createResponse(Request request) instead.
+     */
     public Response handleExecuteClientCall(final Request request) throws IntegrationException {
         final long start = System.currentTimeMillis();
         logMessage(LogLevel.TRACE, "starting request: " + request.url());
