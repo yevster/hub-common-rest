@@ -307,7 +307,7 @@ public abstract class RestConnection {
         return getRequestBuilder(null);
     }
 
-    private Request.Builder getRequestBuilder(final Map<String, String> headers) {
+    protected Request.Builder getRequestBuilder(final Map<String, String> headers) {
         final Request.Builder builder = new Request.Builder();
         final Map<String, String> requestHeaders = new HashMap<>();
         requestHeaders.putAll(commonRequestHeaders);
